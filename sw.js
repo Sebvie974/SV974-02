@@ -1,7 +1,7 @@
 const CACHE_NAME = 'courses-v2';
 const ASSETS = [
   'index.html',
-  'manifest.json'
+  'Manifest.json'
 ];
 
 // Installation : Mise en cache des fichiers
