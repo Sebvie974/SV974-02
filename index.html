@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mes Courses Multi-Magasins</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #27ae60;
+            --danger: #e74c3c;
+            --promo: #f39c12;
+            --dark: #2c3e50;
+            --bg: #f8f9fa;
+            --gray: #ecf0f1;
+            --accent: #3498db;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 10px; color: #333; margin: 0; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 95vh; }
+        
+        .header-total { 
+            background: var(--dark); color: white; padding: 15px; border-radius: 12px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 15px; position: sticky; top: 0; z-index: 1000;
+        }
+        #total-price { font-size: 1.6rem; font-weight: bold; color: #2ecc71; }
+
+        .json-actions { display: flex; gap: 5px; margin-bottom: 10px; }
+        .btn-small { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+
+        .admin-panel { background: var(--gray); padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+        .input-group { display: flex; gap: 5px; margin-bottom: 8px; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .btn-add { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; padding: 10px; border-radius: 6px; }
+
+        .shop-section { margin-bottom: 20px; border: 1px solid #eee; border-radius: 10px; overflow: hidden; background: #fff; }
+        .shop-header { background: #eee; padding: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .shop-title { font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .shop-total-badge { background: var(--dark); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.8rem; }
+        
+        .shop-content { padding: 0 10px; }
+        .collapsed .shop-content { display: none; }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; gap: 8px; }
+        .item-main { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        .item-name { font-weight: 600; font-size: 1.05rem; }
+        
+        .controls-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+        .qty-controls { display: flex; align-items: center; background: var(--gray); border-radius: 4px; border: 1px solid #ccc; overflow: hidden; }
+        .btn-qty { width: 32px; height: 32px; border: none; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
+        .qty-input { width: 45px; border: none; text-align: center; font-size: 0.9rem; height: 32px; background: white; }
+        
+        .prices-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+        .price-input { width: 60px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; text-align: right; font-size: 0.9rem; }
+        .price-promo { border-color: var(--promo); color: var(--promo); font-weight: bold; }
+        .has-promo .price-normal { text-decoration: line-through; opacity: 0.6; }
+
+        .line-total { font-weight: bold; min-width: 65px; text-align: right; color: var(--dark); }
+        
+        input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--primary); }
+        .checked .item-name, .checked .line-total { text-decoration: line-through; color: #999; }
+        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; }
+        
+        .arrow { font-size: 0.8rem; transition: transform 0.2s; }
+        .collapsed .arrow { transform: rotate(-90deg); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-total">
+        <span>TOTAL GÉNÉRAL</span>
+        <div id="total-price">0.00 €</div>
+    </div>
+
+    <div class="json-actions">
+        <button class="btn-small" onclick="exportJSON()">📤 Sauvegarder</button>
+        <button class="btn-small" onclick="triggerImport()">📥 Charger</button>
+        <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
+    </div>
+
+    <div class="admin-panel">
+        <div class="input-group">
+            <input type="text" id="shopInput" placeholder="Nouveau magasin..." style="flex: 1;">
+            <button class="btn-add" onclick="addShop()" style="background: var(--accent);">+ Magasin</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="itemInput" placeholder="Article..." style="flex: 1.5;">
+            <select id="shopSelect"></select>
+            <button class="btn-add" onclick="addItemFromUI()">OK</button>
+        </div>
+    </div>
+
+    <div id="masterList"></div>
+</div>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
+    }
+
+    let data = { shops: [] };
+
+    function addShop(name = "") {
+        const shopName = name || document.getElementById('shopInput').value.trim();
+        if (!shopName) return;
+        if (!data.shops.find(s => s.name === shopName)) {
+            data.shops.push({ name: shopName, items: [], collapsed: false });
+        }
+        document.getElementById('shopInput').value = "";
+        render();
+    }
+
+    function addItemFromUI() {
+        const name = document.getElementById('itemInput').value.trim();
+        const shopName = document.getElementById('shopSelect').value;
+        if (!name || !shopName) return;
+
+        const shop = data.shops.find(s => s.name === shopName);
+        shop.items.push({ name, qty: 1, price: 0, promo: 0, checked: false });
+        document.getElementById('itemInput').value = "";
+        render();
+    }
+
+    function render() {
+        const master = document.getElementById('masterList');
+        const select = document.getElementById('shopSelect');
+        const currentShopSelection = select.value;
+        
+        master.innerHTML = "";
+        select.innerHTML = '<option value="">Magasin...</option>';
+
+        let grandTotal = 0;
+
+        data.shops.forEach((shop, sIdx) => {
+            const opt = document.createElement('option');
+            opt.value = shop.name; opt.innerText = shop.name;
+            if(shop.name === currentShopSelection) opt.selected = true;
+            select.appendChild(opt);
+
+            const section = document.createElement('div');
+            section.className = `shop-section ${shop.collapsed ? 'collapsed' : ''}`;
+            
+            let shopTotal = 0;
+            const itemsHtml = shop.items.map((item, iIdx) => {
+                const effectivePrice = (parseFloat(item.promo) > 0) ? item.promo : item.price;
+                const subTotal = (parseFloat(item.qty) || 0) * (parseFloat(effectivePrice) || 0);
+                shopTotal += subTotal;
+                const hasPromo = parseFloat(item.promo) > 0;
+
+                return `
+                    <li class="${item.checked ? 'checked' : ''}">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${sIdx}, ${iIdx})">
+                        <div class="item-main">
+                            <span class="item-name">${item.name}</span>
+                            <div class="controls-grid">
+                                <div class="qty-controls">
+                                    <button class="btn-qty" onclick="updateItem(${sIdx}, ${iIdx}, 'qty', -1)">-</button>
+                                    <input type="number" class="qty-input" value="${item.qty}" step="any" inputmode="decimal" 
+                                           onblur="updateItem(${sIdx}, ${iIdx}, 'qty_abs', this.value)" 
+                                           onkeypress="if(event.key==='Enter') this.blur()">
+                                    <button class="btn-qty" onclick="updateItem(${sIdx}, ${iIdx}, 'qty', 1)">+</button>
+                                </div>
+                                <div class="prices-row ${hasPromo ? 'has-promo' : ''}">
+                                    <input type="number" class="price-input price-normal" value="${item.price || ''}" placeholder="Prix" step="0.01" inputmode="decimal"
+                                           onblur="updateItem(${sIdx}, ${iIdx}, 'price', this.value)"
+                                           onkeypress="if(event.key==='Enter') this.blur()">
+                                    <input type="number" class="price-input price-promo" value="${item.promo || ''}" placeholder="Promo" step="0.01" inputmode="decimal"
+                                           onblur="updateItem(${sIdx}, ${iIdx}, 'promo', this.value)"
+                                           onkeypress="if(event.key==='Enter') this.blur()">
+                                    <span style="font-size:0.8rem">€</span>
+                                </div>
+                                <div class="line-total">${subTotal.toFixed(2)}€</div>
+                            </div>
+                        </div>
+                        <button class="btn-del" onclick="deleteItem(${sIdx}, ${iIdx})">✕</button>
+                    </li>`;
+            }).join('');
+
+            grandTotal += shopTotal;
+
+            section.innerHTML = `
+                <div class="shop-header" onclick="toggleCollapse(${sIdx})">
+                    <div class="shop-title"><span class="arrow">▼</span> ${shop.name}</div>
+                    <div>
+                        <span class="shop-total-badge">${shopTotal.toFixed(2)} €</span>
+                        <button class="btn-del" style="font-size:0.8rem; margin-left:10px" onclick="deleteShop(event, ${sIdx})">✕</button>
+                    </div>
+                </div>
+                <div class="shop-content"><ul>${itemsHtml}</ul></div>
+            `;
+            master.appendChild(section);
+        });
+
+        document.getElementById('total-price').innerText = grandTotal.toFixed(2) + " €";
+    }
+
+    function toggleCollapse(idx) { data.shops[idx].collapsed = !data.shops[idx].collapsed; render(); }
+    function toggleItem(sIdx, iIdx) { data.shops[sIdx].items[iIdx].checked = !data.shops[sIdx].items[iIdx].checked; render(); }
+
+    function updateItem(sIdx, iIdx, field, val) {
+        const item = data.shops[sIdx].items[iIdx];
+        const numVal = parseFloat(val.toString().replace(',', '.')) || 0;
+        if (field === 'qty') item.qty = Math.max(0, (parseFloat(item.qty) || 0) + val);
+        if (field === 'qty_abs') item.qty = Math.max(0, numVal);
+        if (field === 'price') item.price = numVal;
+        if (field === 'promo') item.promo = numVal;
+        render();
+    }
+
+    function deleteItem(sIdx, iIdx) { data.shops[sIdx].items.splice(iIdx, 1); render(); }
+    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer ce magasin ?")) { data.shops.splice(idx, 1); render(); } }
+
+    function exportJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const dl = document.createElement('a');
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute("download", "liste_courses.json");
+        dl.click();
+    }
+
+    function triggerImport() { document.getElementById('fileInput').click(); }
+    function importJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (imported.shops) { data = imported; render(); }
+            } catch (err) { alert("Format invalide"); }
+        };
+        reader.readAsText(file);
+    }
+
+    addShop("Mon Magasin");
+</script>
+</body>
+</html>
