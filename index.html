@@ -101,11 +101,19 @@
 </div>
 
 <script>
+    // --- ENREGISTREMENT PWA ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
     }
 
-    let data = { shops: [] };
+    // --- DONNÉES ET PERSISTANCE ---
+    // On essaie de charger les données du LocalStorage, sinon on crée une liste vide
+    let data = JSON.parse(localStorage.getItem('maListeCourses')) || { shops: [] };
+
+    // Fonction capitale : Sauvegarde dans le téléphone
+    function saveToPhone() {
+        localStorage.setItem('maListeCourses', JSON.stringify(data));
+    }
 
     function addShop(name = "") {
         const shopName = name || document.getElementById('shopInput').value.trim();
@@ -114,6 +122,7 @@
             data.shops.push({ name: shopName, items: [], collapsed: false });
         }
         document.getElementById('shopInput').value = "";
+        saveToPhone(); // On enregistre
         render();
     }
 
@@ -125,6 +134,7 @@
         const shop = data.shops.find(s => s.name === shopName);
         shop.items.push({ name, qty: 1, price: 0, promo: 0, checked: false });
         document.getElementById('itemInput').value = "";
+        saveToPhone(); // On enregistre
         render();
     }
 
@@ -201,8 +211,16 @@
         document.getElementById('total-price').innerText = grandTotal.toFixed(2) + " €";
     }
 
-    function toggleCollapse(idx) { data.shops[idx].collapsed = !data.shops[idx].collapsed; render(); }
-    function toggleItem(sIdx, iIdx) { data.shops[sIdx].items[iIdx].checked = !data.shops[sIdx].items[iIdx].checked; render(); }
+    // --- LOGIQUE DE MISE À JOUR ---
+    function toggleCollapse(idx) { 
+        data.shops[idx].collapsed = !data.shops[idx].collapsed; 
+        saveToPhone(); render(); 
+    }
+    
+    function toggleItem(sIdx, iIdx) { 
+        data.shops[sIdx].items[iIdx].checked = !data.shops[sIdx].items[iIdx].checked; 
+        saveToPhone(); render(); 
+    }
 
     function updateItem(sIdx, iIdx, field, val) {
         const item = data.shops[sIdx].items[iIdx];
@@ -211,17 +229,29 @@
         if (field === 'qty_abs') item.qty = Math.max(0, numVal);
         if (field === 'price') item.price = numVal;
         if (field === 'promo') item.promo = numVal;
+        saveToPhone(); // On enregistre chaque changement
         render();
     }
 
-    function deleteItem(sIdx, iIdx) { data.shops[sIdx].items.splice(iIdx, 1); render(); }
-    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer ce magasin ?")) { data.shops.splice(idx, 1); render(); } }
+    function deleteItem(sIdx, iIdx) { 
+        data.shops[sIdx].items.splice(iIdx, 1); 
+        saveToPhone(); render(); 
+    }
+    
+    function deleteShop(e, idx) { 
+        e.stopPropagation(); 
+        if(confirm("Supprimer ce magasin ?")) { 
+            data.shops.splice(idx, 1); 
+            saveToPhone(); render(); 
+        } 
+    }
 
+    // Fonctions Import/Export JSON (pour backup externe)
     function exportJSON() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
         const dl = document.createElement('a');
         dl.setAttribute("href", dataStr);
-        dl.setAttribute("download", "liste_courses.json");
+        dl.setAttribute("download", "liste_courses_backup.json");
         dl.click();
     }
 
@@ -233,13 +263,22 @@
         reader.onload = e => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if (imported.shops) { data = imported; render(); }
+                if (imported.shops) { 
+                    data = imported; 
+                    saveToPhone(); // On écrase le localstorage avec l'import
+                    render(); 
+                }
             } catch (err) { alert("Format invalide"); }
         };
         reader.readAsText(file);
     }
 
-    addShop("Mon Magasin");
+    // Au premier démarrage, si c'est totalement vide, on ajoute un magasin par défaut
+    if (data.shops.length === 0) {
+        addShop("Mon Magasin");
+    } else {
+        render(); // Sinon on affiche simplement ce qu'on a récupéré
+    }
 
 // --- CODE D'ENREGISTREMENT DE LA PWA ---
 if ('serviceWorker' in navigator) {
