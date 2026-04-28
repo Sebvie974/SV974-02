@@ -61,9 +61,10 @@
 
         .scrollable-content { padding: 15px; flex-grow: 1; }
 
-        .json-actions { display: flex; gap: 8px; margin-bottom: 15px; }
+        .json-actions { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
         .btn-small { 
             flex: 1; 
+            min-width: 100px;
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 8px; 
@@ -76,6 +77,7 @@
             justify-content: center;
             gap: 5px;
         }
+        .btn-clear { border-color: var(--danger); color: var(--danger); }
 
         .shop-section { margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; overflow: hidden; background: #fff; }
         .shop-header { background: #eee; padding: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -88,6 +90,7 @@
         ul { list-style: none; padding: 0; margin: 0; }
         li { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; gap: 8px; }
         .item-main { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        .item-info { display: flex; align-items: center; gap: 10px; }
         .item-name { font-weight: 600; font-size: 1rem; }
         
         .controls-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
@@ -104,7 +107,11 @@
         
         input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); flex-shrink: 0; }
         .checked .item-name, .checked .line-total { text-decoration: line-through; color: #999; }
-        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 5px; }
+        
+        .btn-icon { background: none; border: none; cursor: pointer; padding: 5px; font-size: 1.1rem; }
+        .btn-edit { color: var(--accent); font-size: 0.9rem; }
+        .btn-del { color: var(--danger); }
+        .btn-clear-shop { color: var(--promo); font-size: 1.1rem; }
         
         .arrow { font-size: 0.7rem; transition: transform 0.2s; }
         .collapsed .arrow { transform: rotate(-90deg); }
@@ -142,6 +149,7 @@
         <div class="json-actions">
             <button class="btn-small" onclick="exportJSON()">📤 Sauvegarder</button>
             <button class="btn-small" onclick="triggerImport()">📥 Charger</button>
+            <button class="btn-small btn-clear" onclick="clearAllItems()">🗑️ Tout vider</button>
             <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
         </div>
 
@@ -223,7 +231,10 @@
                     <li class="${item.checked ? 'checked' : ''}">
                         <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${sIdx}, ${iIdx})">
                         <div class="item-main">
-                            <span class="item-name">${item.name}</span>
+                            <div class="item-info">
+                                <span class="item-name">${item.name}</span>
+                                <button class="btn-icon btn-edit" onclick="editItemName(${sIdx}, ${iIdx})">✏️</button>
+                            </div>
                             <div class="controls-grid">
                                 <div class="qty-controls">
                                     <button class="btn-qty" onclick="updateItem(${sIdx}, ${iIdx}, 'qty', -1)">-</button>
@@ -243,16 +254,17 @@
                                 <div class="line-total">${subTotal.toFixed(2)}€</div>
                             </div>
                         </div>
-                        <button class="btn-del" onclick="deleteItem(${sIdx}, ${iIdx})">✕</button>
+                        <button class="btn-icon btn-del" onclick="deleteItem(${sIdx}, ${iIdx})">✕</button>
                     </li>`;
             }).join('');
 
             section.innerHTML = `
                 <div class="shop-header" onclick="toggleCollapse(${sIdx})">
                     <div class="shop-title"><span class="arrow">▼</span> ${shop.name}</div>
-                    <div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
                         <span class="shop-total-badge">${shopTotal.toFixed(2)} €</span>
-                        <button class="btn-del" style="font-size:0.8rem; margin-left:10px" onclick="deleteShop(event, ${sIdx})">✕</button>
+                        <button class="btn-icon btn-clear-shop" title="Vider ce magasin" onclick="clearShopItems(event, ${sIdx})">🗑️</button>
+                        <button class="btn-icon btn-del" title="Supprimer le magasin" onclick="deleteShop(event, ${sIdx})">✕</button>
                     </div>
                 </div>
                 <div class="shop-content"><ul>${itemsHtml}</ul></div>
@@ -262,6 +274,31 @@
 
         document.getElementById('total-price').innerText = grandTotal.toFixed(2) + " €";
         document.getElementById('checked-price').innerText = checkedTotal.toFixed(2) + " €";
+    }
+
+    function editItemName(sIdx, iIdx) {
+        const currentName = data.shops[sIdx].items[iIdx].name;
+        const newName = prompt("Modifier le nom de l'article :", currentName);
+        if (newName !== null && newName.trim() !== "") {
+            data.shops[sIdx].items[iIdx].name = newName.trim();
+            saveAndRender();
+        }
+    }
+
+    function clearAllItems() {
+        if (confirm("Voulez-vous vraiment effacer TOUS les articles de TOUS les magasins ?")) {
+            data.shops.forEach(shop => { shop.items = []; });
+            saveAndRender();
+        }
+    }
+
+    function clearShopItems(e, sIdx) {
+        e.stopPropagation();
+        const shopName = data.shops[sIdx].name;
+        if (confirm(`Voulez-vous vider tous les articles de "${shopName}" ?`)) {
+            data.shops[sIdx].items = [];
+            saveAndRender();
+        }
     }
 
     function toggleCollapse(idx) { data.shops[idx].collapsed = !data.shops[idx].collapsed; saveAndRender(); }
@@ -278,7 +315,7 @@
     }
 
     function deleteItem(sIdx, iIdx) { data.shops[sIdx].items.splice(iIdx, 1); saveAndRender(); }
-    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer ce magasin ?")) { data.shops.splice(idx, 1); saveAndRender(); } }
+    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer complètement ce magasin ?")) { data.shops.splice(idx, 1); saveAndRender(); } }
 
     function exportJSON() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
