@@ -20,11 +20,19 @@
             --accent: #3498db;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 10px; color: #333; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 0; color: #333; margin: 0; }
 
-        .container { max-width: 700px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 95vh; }
+        .container { max-width: 700px; margin: auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
         
-        /* HEADER DOUBLE TOTAL */
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--bg);
+            padding: 10px 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
         .header-total { 
             background: var(--dark); 
             color: white; 
@@ -33,29 +41,41 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 15px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
         }
         .total-box { display: flex; flex-direction: column; align-items: center; border-right: 1px solid #444; }
         .total-box:last-child { border-right: none; }
         .total-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
         .total-val { font-size: 1.3rem; font-weight: bold; }
-        #checked-price { color: #2ecc71; } /* Vert pour ce qui est payé/dans le panier */
-        #total-price { color: #bdc3c7; }   /* Gris clair pour l'estimation */
+        #checked-price { color: #2ecc71; }
+        #total-price { color: #bdc3c7; }
 
-        .json-actions { display: flex; gap: 5px; margin-bottom: 10px; }
-        .btn-small { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-
-        .admin-panel { background: var(--gray); padding: 12px; border-radius: 10px; margin-bottom: 15px; }
+        .admin-panel { background: var(--gray); padding: 10px; border-radius: 10px; }
         .input-group { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; width: 100%; }
+        .input-group:last-child { margin-bottom: 0; }
+        
         input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-
         #itemInput { flex: 2; min-width: 0; }
         #shopSelect { flex: 1; min-width: 90px; max-width: 130px; font-size: 0.85rem; }
         .btn-add { flex: 0 0 auto; background: var(--primary); color: white; border: none; font-weight: bold; padding: 10px 15px; border-radius: 6px; cursor: pointer; }
+
+        .scrollable-content { padding: 15px; flex-grow: 1; }
+
+        .json-actions { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-small { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            background: white; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
 
         .shop-section { margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; overflow: hidden; background: #fff; }
         .shop-header { background: #eee; padding: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -75,7 +95,7 @@
         .btn-qty { width: 30px; height: 30px; border: none; cursor: pointer; font-weight: bold; }
         .qty-input { width: 40px; border: none; text-align: center; font-size: 0.9rem; height: 30px; background: white; }
         
-        .prices-row { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: nowrap; }
+        .prices-row { display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
         .price-input { width: 52px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 0.85rem; }
         .price-promo { border-color: var(--promo); color: var(--promo); font-weight: bold; }
         .has-promo .price-normal { text-decoration: line-through; opacity: 0.5; }
@@ -93,47 +113,49 @@
 <body>
 
 <div class="container">
-    <div class="header-total">
-        <div class="total-box">
-            <span class="total-label">Dans Panier</span>
-            <div id="checked-price" class="total-val">0.00 €</div>
+    <div class="sticky-top">
+        <div class="header-total">
+            <div class="total-box">
+                <span class="total-label">Dans Panier</span>
+                <div id="checked-price" class="total-val">0.00 €</div>
+            </div>
+            <div class="total-box">
+                <span class="total-label">Total Prévu</span>
+                <div id="total-price" class="total-val">0.00 €</div>
+            </div>
         </div>
-        <div class="total-box">
-            <span class="total-label">Total Prévu</span>
-            <div id="total-price" class="total-val">0.00 €</div>
+
+        <div class="admin-panel">
+            <div class="input-group">
+                <input type="text" id="shopInput" placeholder="Nouveau magasin..." style="flex: 1;">
+                <button class="btn-add" onclick="addShop()" style="background: var(--accent);">+ Mag</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="itemInput" placeholder="Article...">
+                <select id="shopSelect"></select>
+                <button class="btn-add" onclick="addItemFromUI()">OK</button>
+            </div>
         </div>
     </div>
 
-    <div class="json-actions">
-        <button class="btn-small" onclick="exportJSON()">📤 Export Backup</button>
-        <button class="btn-small" onclick="triggerImport()">📥 Import Backup</button>
-        <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
-    </div>
-
-    <div class="admin-panel">
-        <div class="input-group">
-            <input type="text" id="shopInput" placeholder="Nouveau magasin..." style="flex: 1;">
-            <button class="btn-add" onclick="addShop()" style="background: var(--accent);">+ Mag</button>
+    <div class="scrollable-content">
+        <div class="json-actions">
+            <button class="btn-small" onclick="exportJSON()">📤 Sauvegarder</button>
+            <button class="btn-small" onclick="triggerImport()">📥 Charger</button>
+            <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
         </div>
-        <div class="input-group">
-            <input type="text" id="itemInput" placeholder="Article...">
-            <select id="shopSelect"></select>
-            <button class="btn-add" onclick="addItemFromUI()">OK</button>
-        </div>
-    </div>
 
-    <div id="masterList"></div>
+        <div id="masterList"></div>
+    </div>
 </div>
 
 <script>
-    // --- SERVICE WORKER & PWA ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
         });
     }
 
-    // --- LOGIQUE DONNÉES (LocalStorage) ---
     let data = JSON.parse(localStorage.getItem('maListeCoursesV2')) || { shops: [] };
 
     function saveToPhone() {
@@ -262,7 +284,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
         const dl = document.createElement('a');
         dl.setAttribute("href", dataStr);
-        dl.setAttribute("download", "backup_courses.json");
+        dl.setAttribute("download", "ma_liste_courses.json");
         dl.click();
     }
 
