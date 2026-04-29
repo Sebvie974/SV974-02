@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         :root {
@@ -158,12 +159,28 @@
 </div>
 
 <script>
+    // --- CONNEXION PWA ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                // Vérifier s'il y a une mise à jour du code
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            if(confirm("Nouvelle version disponible ! Recharger ?")) {
+                                window.location.reload();
+                            }
+                        }
+                    };
+                };
+            })
+            .catch(err => console.log('Erreur SW:', err));
         });
     }
 
+    // --- LOGIQUE DONNÉES ---
     let data = JSON.parse(localStorage.getItem('maListeCoursesV2')) || { shops: [] };
 
     function saveToPhone() {
@@ -286,7 +303,7 @@
     }
 
     function clearAllItems() {
-        if (confirm("Voulez-vous vraiment effacer TOUS les articles de TOUS les magasins ?")) {
+        if (confirm("Voulez-vous vraiment effacer TOUS les articles ?")) {
             data.shops.forEach(shop => { shop.items = []; });
             saveAndRender();
         }
@@ -294,8 +311,7 @@
 
     function clearShopItems(e, sIdx) {
         e.stopPropagation();
-        const shopName = data.shops[sIdx].name;
-        if (confirm(`Voulez-vous vider tous les articles de "${shopName}" ?`)) {
+        if (confirm(`Vider les articles de ce magasin ?`)) {
             data.shops[sIdx].items = [];
             saveAndRender();
         }
@@ -315,7 +331,7 @@
     }
 
     function deleteItem(sIdx, iIdx) { data.shops[sIdx].items.splice(iIdx, 1); saveAndRender(); }
-    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer complètement ce magasin ?")) { data.shops.splice(idx, 1); saveAndRender(); } }
+    function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer ce magasin ?")) { data.shops.splice(idx, 1); saveAndRender(); } }
 
     function exportJSON() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
