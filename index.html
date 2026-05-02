@@ -17,27 +17,24 @@
             --bg: #f8f9fa;
             --gray: #ecf0f1;
             --accent: #3498db;
-            /* Hauteur estimée de l'en-tête fixe pour le décalage du sticky */
-            --header-height: 175px; 
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 0; color: #333; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 0; color: #333; margin: 0; overflow-x: hidden; }
         .container { max-width: 700px; margin: auto; background: white; min-height: 100vh; }
         
-        /* EN-TÊTE PRINCIPAL : Toujours tout en haut */
         .sticky-top {
             position: sticky;
             top: 0;
             z-index: 3000; 
             background: var(--bg);
-            padding: 10px 15px;
+            padding: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .header-total { 
             background: var(--dark); 
             color: white; 
-            padding: 12px; 
+            padding: 10px; 
             border-radius: 12px; 
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -46,75 +43,80 @@
         }
         .total-box { display: flex; flex-direction: column; align-items: center; border-right: 1px solid #444; text-align: center; }
         .total-box:last-child { border-right: none; }
-        .total-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .total-val { font-size: 1.1rem; font-weight: bold; }
+        .total-label { font-size: 0.55rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 2px; }
+        .total-val { font-size: 1rem; font-weight: bold; }
         #checked-price { color: #2ecc71; }
         #remaining-budget { color: #3498db; }
         .over-budget { color: var(--danger) !important; }
 
         .admin-panel { background: var(--gray); padding: 10px; border-radius: 10px; }
-        .input-group { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; width: 100%; }
+        .input-group { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; width: 100%; }
         
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        #budgetInput { width: 70px; font-weight: bold; color: var(--dark); }
-        #itemInput { flex: 2; min-width: 0; }
-        #shopSelect { flex: 1; min-width: 90px; max-width: 130px; font-size: 0.85rem; }
-        .btn-add { flex: 0 0 auto; background: var(--primary); color: white; border: none; font-weight: bold; padding: 10px 15px; border-radius: 6px; cursor: pointer; }
-
-        .scrollable-content { padding: 15px; }
-        .json-actions { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
-        .btn-small { flex: 1; min-width: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        .shop-section { margin-bottom: 20px; border: 1px solid #eee; border-radius: 10px; background: #fff; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; min-width: 0; }
         
-        /* EN-TÊTE MAGASIN : Se fige sous l'en-tête principal au scroll */
+        /* Correction largeur Nouveau Magasin */
+        #budgetInput { width: 60px; font-weight: bold; flex-shrink: 0; }
+        #shopInput { flex: 1; min-width: 80px; } 
+        #itemInput { flex: 2; min-width: 100px; }
+        #shopSelect { flex: 1; max-width: 110px; font-size: 0.8rem; }
+        
+        .btn-add { flex-shrink: 0; background: var(--primary); color: white; border: none; font-weight: bold; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+
+        .scrollable-content { padding: 10px; }
+        .json-actions { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
+        .btn-small { flex: 1; min-width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 8px; background: white; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+
+        .shop-section { margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; background: #fff; }
+        
         .shop-header { 
             position: sticky;
-            top: 175px; /* Doit correspondre à la hauteur de .sticky-top */
             z-index: 2000;
             background: #f1f1f1; 
-            padding: 12px; 
+            padding: 10px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
             cursor: pointer;
             border-bottom: 1px solid #ddd;
-            margin: -1px; /* Pour couvrir la bordure de la section */
             border-radius: 10px 10px 0 0;
         }
 
-        .shop-title { font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
-        .shop-badges { display: flex; align-items: center; gap: 5px; }
-        .shop-total-badge { color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .shop-title { font-weight: bold; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .shop-badges { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .shop-total-badge { color: white; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
         .badge-all { background: var(--dark); opacity: 0.7; }
         .badge-checked { background: var(--primary); }
         
-        .shop-content { padding: 0 10px; }
+        .shop-content { padding: 0 5px; }
         .collapsed .shop-content { display: none; }
 
         ul { list-style: none; padding: 0; margin: 0; }
-        li { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; gap: 8px; }
-        .item-main { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        li { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f1f1; gap: 5px; }
+        .item-main { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .item-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
         
-        .controls-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
-        .qty-controls { display: flex; align-items: center; background: var(--gray); border-radius: 4px; border: 1px solid #ccc; overflow: hidden; }
-        .btn-qty { width: 30px; height: 30px; border: none; cursor: pointer; font-weight: bold; }
-        .qty-input { width: 40px; border: none; text-align: center; font-size: 0.9rem; height: 30px; background: white; }
+        /* Correction Grille contrôles article */
+        .controls-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 5px; }
         
-        .prices-row { display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
-        .price-input { width: 52px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 0.85rem; }
+        /* Correction taille boutons Quantité */
+        .qty-controls { display: flex; align-items: center; background: var(--gray); border-radius: 4px; border: 1px solid #ccc; overflow: hidden; flex-shrink: 0; }
+        .btn-qty { width: 28px; height: 28px; border: none; cursor: pointer; font-weight: bold; background: #eee; }
+        .qty-input { width: 35px; border: none; text-align: center; font-size: 0.85rem; height: 28px; background: white; padding: 0; }
+        
+        .prices-row { display: flex; gap: 3px; align-items: center; justify-content: flex-end; }
+        .price-input { width: 48px; padding: 4px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 0.8rem; }
         .price-promo { border-color: var(--promo); color: var(--promo); font-weight: bold; }
         .has-promo .price-normal { text-decoration: line-through; opacity: 0.5; }
 
-        .line-total { font-weight: bold; min-width: 60px; text-align: right; font-size: 0.95rem; }
+        .line-total { font-weight: bold; min-width: 55px; text-align: right; font-size: 0.9rem; }
         
-        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); flex-shrink: 0; }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); flex-shrink: 0; }
         .checked .item-name, .checked .line-total { text-decoration: line-through; color: #999; }
         
-        .btn-icon { background: none; border: none; cursor: pointer; padding: 5px; font-size: 1.1rem; }
+        .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; font-size: 1rem; flex-shrink: 0; }
         .btn-del { color: var(--danger); }
         
-        .arrow { font-size: 0.7rem; transition: transform 0.2s; }
+        .arrow { font-size: 0.6rem; transition: transform 0.2s; }
         .collapsed .arrow { transform: rotate(-90deg); }
     </style>
 </head>
@@ -123,24 +125,15 @@
 <div class="container">
     <div class="sticky-top" id="mainHeader">
         <div class="header-total">
-            <div class="total-box">
-                <span class="total-label">Prévu Total</span>
-                <div id="total-price" class="total-val" style="color: #bdc3c7;">0.00 €</div>
-            </div>
-            <div class="total-box">
-                <span class="total-label">Panier Global</span>
-                <div id="checked-price" class="total-val">0.00 €</div>
-            </div>
-            <div class="total-box">
-                <span class="total-label">Reste Budget</span>
-                <div id="remaining-budget" class="total-val">0.00 €</div>
-            </div>
+            <div class="total-box"><span class="total-label">Prévu</span><div id="total-price" class="total-val">0.00 €</div></div>
+            <div class="total-box"><span class="total-label">Panier</span><div id="checked-price" class="total-val">0.00 €</div></div>
+            <div class="total-box"><span class="total-label">Reste</span><div id="remaining-budget" class="total-val">0.00 €</div></div>
         </div>
 
         <div class="admin-panel">
             <div class="input-group">
                 <input type="number" id="budgetInput" placeholder="Budget" inputmode="decimal" onchange="updateBudget(this.value)">
-                <input type="text" id="shopInput" placeholder="Nouveau magasin..." style="flex: 1;">
+                <input type="text" id="shopInput" placeholder="Nom magasin...">
                 <button class="btn-add" onclick="addShop()" style="background: var(--accent);">+ Mag</button>
             </div>
             <div class="input-group">
@@ -153,12 +146,11 @@
 
     <div class="scrollable-content">
         <div class="json-actions">
-            <button class="btn-small" onclick="exportJSON()">💾 Sauvegarder</button>
-            <button class="btn-small" onclick="triggerImport()">📂 Charger</button>
-            <button class="btn-small" style="color:red" onclick="clearAllItems()">🗑️ Vider tout</button>
+            <button class="btn-small" onclick="exportJSON()">💾 Export</button>
+            <button class="btn-small" onclick="triggerImport()">📂 Import</button>
+            <button class="btn-small" style="color:var(--danger)" onclick="clearAllItems()">🗑️ Vider</button>
             <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
         </div>
-
         <div id="masterList"></div>
     </div>
 </div>
@@ -166,13 +158,9 @@
 <script>
     let data = JSON.parse(localStorage.getItem('maListeCoursesV2')) || { shops: [], budgetMax: 0 };
 
-    // Cette fonction ajuste dynamiquement la position du sticky magasin selon la taille réelle de l'en-tête
     function updateStickyPosition() {
-        const headerHeight = document.getElementById('mainHeader').offsetHeight;
-        const shopHeaders = document.querySelectorAll('.shop-header');
-        shopHeaders.forEach(sh => {
-            sh.style.top = headerHeight + "px";
-        });
+        const h = document.getElementById('mainHeader').offsetHeight;
+        document.querySelectorAll('.shop-header').forEach(sh => sh.style.top = h + "px");
     }
 
     function saveToPhone() { localStorage.setItem('maListeCoursesV2', JSON.stringify(data)); }
@@ -218,8 +206,7 @@
         master.innerHTML = "";
         select.innerHTML = '<option value="">Magasin...</option>';
 
-        let grandTotal = 0;
-        let checkedTotalGlobal = 0;
+        let grandTotal = 0, checkedTotalGlobal = 0;
 
         data.shops.forEach((shop, sIdx) => {
             const opt = document.createElement('option');
@@ -230,18 +217,14 @@
             const section = document.createElement('div');
             section.className = `shop-section ${shop.collapsed ? 'collapsed' : ''}`;
             
-            let shopTotalPrevu = 0;
-            let shopTotalChecked = 0;
+            let shopTotalPrevu = 0, shopTotalChecked = 0;
 
             const itemsHtml = shop.items.map((item, iIdx) => {
                 const effPrice = (parseFloat(item.promo) > 0) ? item.promo : item.price;
                 const subTotal = (parseFloat(item.qty) || 0) * (parseFloat(effPrice) || 0);
                 shopTotalPrevu += subTotal;
                 grandTotal += subTotal;
-                if (item.checked) {
-                    shopTotalChecked += subTotal;
-                    checkedTotalGlobal += subTotal;
-                }
+                if (item.checked) { shopTotalChecked += subTotal; checkedTotalGlobal += subTotal; }
                 const hasPromo = parseFloat(item.promo) > 0;
 
                 return `
@@ -256,8 +239,8 @@
                                     <button class="btn-qty" onclick="updateItem(${sIdx}, ${iIdx}, 'qty', 1)">+</button>
                                 </div>
                                 <div class="prices-row ${hasPromo ? 'has-promo' : ''}">
-                                    <input type="number" class="price-input price-normal" value="${item.price || ''}" placeholder="0.00" step="0.01" inputmode="decimal" onblur="updateItem(${sIdx}, ${iIdx}, 'price', this.value)">
-                                    <input type="number" class="price-input price-promo" value="${item.promo || ''}" placeholder="Prom" step="0.01" inputmode="decimal" onblur="updateItem(${sIdx}, ${iIdx}, 'promo', this.value)">
+                                    <input type="number" class="price-input price-normal" value="${item.price || ''}" placeholder="0" step="0.01" inputmode="decimal" onblur="updateItem(${sIdx}, ${iIdx}, 'price', this.value)">
+                                    <input type="number" class="price-input price-promo" value="${item.promo || ''}" placeholder="%" step="0.01" inputmode="decimal" onblur="updateItem(${sIdx}, ${iIdx}, 'promo', this.value)">
                                 </div>
                                 <div class="line-total">${subTotal.toFixed(2)}€</div>
                             </div>
@@ -272,7 +255,7 @@
                     <div class="shop-badges">
                         <span class="shop-total-badge badge-all">${shopTotalPrevu.toFixed(2)}€</span>
                         <span class="shop-total-badge badge-checked">🛒 ${shopTotalChecked.toFixed(2)}€</span>
-                        <button class="btn-icon btn-del" onclick="deleteShop(event, ${sIdx})">✕</button>
+                        <button class="btn-icon btn-del" onclick="deleteShop(event, ${sIdx})" style="color:#666">✕</button>
                     </div>
                 </div>
                 <div class="shop-content"><ul>${itemsHtml}</ul></div>
@@ -315,13 +298,13 @@
     function importJSON(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = res => { data = JSON.parse(res.target.result); saveAndRender(); };
+        reader.onload = res => { try { data = JSON.parse(res.target.result); saveAndRender(); } catch(e){alert("Erreur fichier");} };
         reader.readAsText(file);
     }
 
     window.addEventListener('resize', updateStickyPosition);
     if (data.shops.length === 0) addShop("Mon Magasin"); else render();
-    setTimeout(updateStickyPosition, 100);
+    setTimeout(updateStickyPosition, 150);
 </script>
 </body>
 </html>
