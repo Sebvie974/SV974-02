@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses Pro - V21</title>
+    <title>Mes Courses Pro - V22</title>
     <style>
         :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; }
         
@@ -34,7 +34,7 @@
         /* ZONE SCROLLABLE */
         .scrollable-content {
             flex-grow: 1; overflow-y: auto; padding-bottom: 50px;
-            max-width: 1000px; margin: 0 auto; width: 100%; -webkit-overflow-scrolling: touch;
+            max-width: 1000px; margin: auto; width: 100%; -webkit-overflow-scrolling: touch;
         }
 
         .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end; flex-wrap: wrap; }
@@ -68,36 +68,33 @@
         .is-checked .name { text-decoration: line-through; color: #888; }
         .name { font-weight: 600; font-size: 1rem; cursor: pointer; }
 
-        /* REDUCTION CASE A COCHER */
-        input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            margin: 0 auto;
-            display: block;
-        }
+        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin: 0 auto; display: block; }
         
-        /* QUANTITE : SANS FLECHES ET PLUS LARGE */
         .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; width: fit-content; overflow: hidden; }
         .btn-q { width: 32px; height: 35px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
-        
-        .in-q { 
-            width: 60px; text-align: center; border: none; font-weight: bold; font-size: 1rem; height: 35px; 
-            -moz-appearance: textfield; 
-        }
-        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { 
-            -webkit-appearance: none; margin: 0; 
-        }
+        .in-q { width: 60px; text-align: center; border: none; font-weight: bold; font-size: 1rem; height: 35px; -moz-appearance: textfield; }
+        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         .in-p { width: 70px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; }
         .row-total { font-weight: bold; width: 70px; text-align: right; }
         .btn-del { background: none; border: none; color: var(--danger); font-size: 1.3rem; cursor: pointer; padding: 5px; }
 
+        /* MODAL CATALOGUE */
+        #modalCat { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0,0,0,0.5); z-index: 10001; display: none; 
+            align-items: center; justify-content: center;
+        }
+        .modal-content { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 10px; display: flex; flex-direction: column; }
+        .modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { overflow-y: auto; padding: 10px; flex-grow: 1; }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #f1f1f1; }
+
         #suggestBox { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 10000; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .s-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
 
-        .footer-btns { display: flex; gap: 10px; padding: 10px; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; }
-        .btn-gray { background: var(--gray-dark); flex: 1; }
+        .footer-btns { display: flex; gap: 8px; padding: 10px; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; flex-wrap: wrap;}
+        .btn-gray { background: var(--gray-dark); flex: 1; min-width: 100px;}
 
         @media (max-width: 650px) {
             .item-row { grid-template-columns: 35px 1fr 40px; grid-template-areas: "check name del" "extra extra extra"; gap: 5px; }
@@ -125,7 +122,7 @@
                 </div>
                 <div class="col">
                     <label>Nouveau Magasin</label>
-                    <input type="text" id="inShop" placeholder="Leclerc, Lidl...">
+                    <input type="text" id="inShop" placeholder="Nom du magasin...">
                 </div>
                 <button class="btn btn-blue" onclick="addShop()">OK</button>
             </div>
@@ -144,9 +141,10 @@
         </div>
         
         <div class="footer-btns">
-            <button class="btn btn-gray" onclick="exportData()">💾 Sauvegarder</button>
-            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Charger</button>
-            <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider Tout</button>
+            <button class="btn btn-gray" onclick="toggleCat(true)">📖 Catalogue</button>
+            <button class="btn btn-gray" onclick="exportData()">💾 Save</button>
+            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Load</button>
+            <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider Listes</button>
             <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
         </div>
     </div>
@@ -154,11 +152,21 @@
     <div class="scrollable-content" id="contentZone"></div>
 </div>
 
+<div id="modalCat">
+    <div class="modal-content">
+        <div class="modal-header">
+            <strong>Gestion du Catalogue</strong>
+            <button onclick="toggleCat(false)" style="border:none; background:none; font-size:1.5rem; cursor:pointer">✕</button>
+        </div>
+        <div class="modal-body" id="catBody"></div>
+    </div>
+</div>
+
 <script>
-    let db = JSON.parse(localStorage.getItem('courses_v21')) || { shops: [], budget: 0, catalogue: [] };
+    let db = JSON.parse(localStorage.getItem('courses_v22')) || { shops: [], budget: 0, catalogue: [] };
 
     function save() {
-        localStorage.setItem('courses_v21', JSON.stringify(db));
+        localStorage.setItem('courses_v22', JSON.stringify(db));
         render();
     }
 
@@ -203,6 +211,10 @@
         if(task === 'qty') it.qty = Math.max(0, parseFloat((it.qty + val).toFixed(2)));
         if(task === 'qty_m') it.qty = Math.max(0, parseFloat(val) || 0);
         if(task === 'check') it.checked = !it.checked;
+        if(task === 'name') {
+            const newN = prompt("Modifier le nom :", it.name);
+            if(newN && newN.trim()) it.name = newN.trim();
+        }
         if(task === 'price') {
             it.price = parseFloat(val) || 0;
             let c = db.catalogue.find(x => x.name.toLowerCase() === it.name.toLowerCase());
@@ -212,14 +224,25 @@
         save();
     }
 
-    function clearShop(sId) {
-        if(confirm("Vider les articles de ce magasin ?")) {
-            const s = db.shops.find(x => x.id == sId);
-            if(s) s.items = [];
-            save();
-        }
+    function toggleCat(show) {
+        const m = document.getElementById('modalCat');
+        const b = document.getElementById('catBody');
+        if(show) {
+            b.innerHTML = db.catalogue.length ? "" : "Catalogue vide.";
+            db.catalogue.sort((a,b) => a.name.localeCompare(b.name)).forEach((c, idx) => {
+                b.innerHTML += `
+                <div class="cat-item">
+                    <span>${c.name} (${c.price.toFixed(2)}€)</span>
+                    <button onclick="delCat(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer; font-size:1.2rem">✕</button>
+                </div>`;
+            });
+            m.style.display = 'flex';
+        } else { m.style.display = 'none'; }
     }
 
+    function delCat(idx) { if(confirm("Supprimer du catalogue ?")) { db.catalogue.splice(idx, 1); save(); toggleCat(true); } }
+
+    function clearShop(sId) { if(confirm("Vider ce magasin ?")) { const s = db.shops.find(x => x.id == sId); if(s) s.items = []; save(); } }
     function delShop(id) { if(confirm("Supprimer ce magasin ?")) { db.shops = db.shops.filter(s => s.id != id); save(); } }
     function clearAll() { if(confirm("Vider toutes les listes ?")) { db.shops.forEach(s => s.items = []); save(); } }
 
@@ -259,14 +282,14 @@
                 if(!isMobile) {
                     return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
                         <div><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
-                        <div class="name" onclick="edit(${s.id}, ${it.id}, 'check')">${it.name}</div>
+                        <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
                         ${innerRow}
                         <div><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
                     </div>`;
                 } else {
                     return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
                         <div style="grid-area:check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
-                        <div class="name" style="grid-area:name" onclick="edit(${s.id}, ${it.id}, 'check')">${it.name}</div>
+                        <div class="name" style="grid-area:name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
                         <div style="grid-area:del; text-align:right"><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
                         <div class="extra-zone">${innerRow}</div>
                     </div>`;
@@ -302,7 +325,7 @@
     }
     function importData(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); save(); } catch(e) {alert("Erreur de chargement");} };
+        reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); save(); } catch(e) {alert("Erreur");} };
         reader.readAsText(e.target.files[0]);
     }
 
