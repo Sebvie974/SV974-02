@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses Pro - V25</title>
+    <title>Mes Courses Pro - V26</title>
     <style>
         :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; --promo-color: #9b59b6; }
         
@@ -59,24 +59,26 @@
         .bg-green { background: var(--primary); }
         .btn-clear-shop { background: none; border: none; color: var(--orange); cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
 
+        /* GRILLE ARTICLES AJUSTÉE POUR ÉVITER LES RETOURS LIGNE */
         .item-row { 
-            display: grid; grid-template-columns: 40px 1fr 120px 130px 130px 80px 40px; 
-            align-items: center; padding: 10px; border-bottom: 1px solid #eee; gap: 10px; 
+            display: grid; 
+            grid-template-columns: 35px 1fr 125px 85px 85px 75px 35px; 
+            align-items: center; padding: 8px 10px; border-bottom: 1px solid #eee; gap: 8px; 
         }
         .is-checked { background: #f9f9f9; opacity: 0.6; }
         .is-checked .name { text-decoration: line-through; color: #888; }
-        .name { font-weight: 600; font-size: 1rem; cursor: pointer; }
+        .name { font-weight: 600; font-size: 0.95rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin: 0 auto; display: block; }
         .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; width: fit-content; overflow: hidden; }
-        .btn-q { width: 32px; height: 35px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
-        .in-q { width: 60px; text-align: center; border: none; font-weight: bold; font-size: 1rem; height: 35px; -moz-appearance: textfield; }
+        .btn-q { width: 30px; height: 34px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
+        .in-q { width: 55px; text-align: center; border: none; font-weight: bold; font-size: 0.95rem; height: 34px; -moz-appearance: textfield; }
         .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        .in-p { width: 70px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; }
-        .in-promo { border-color: var(--promo-color); color: var(--promo-color); }
-        .row-total { font-weight: bold; width: 70px; text-align: right; }
-        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.3rem; cursor: pointer; padding: 5px; }
+        .in-p { width: 68px; padding: 5px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        .in-promo { border-color: var(--promo-color); color: var(--promo-color); font-weight: bold; }
+        .row-total { font-weight: bold; width: 70px; text-align: right; font-size: 0.95rem; }
+        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; padding: 2px; }
 
         /* MODAL CATALOGUE */
         #modalCat { 
@@ -97,9 +99,10 @@
         .footer-btns { display: flex; gap: 8px; padding: 10px; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; flex-wrap: wrap;}
         .btn-gray { background: var(--gray-dark); flex: 1; min-width: 100px;}
 
-        @media (max-width: 800px) {
-            .item-row { grid-template-columns: 35px 1fr 40px; grid-template-areas: "check name del" "extra extra extra"; gap: 5px; }
-            .extra-zone { grid-area: extra; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 5px; border-radius: 5px; border: 1px solid #eee; gap: 10px; }
+        @media (max-width: 950px) {
+            .item-row { grid-template-columns: 35px 1fr 35px; grid-template-areas: "check name del" "extra extra extra"; gap: 5px; }
+            .extra-zone { grid-area: extra; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 6px; border-radius: 5px; border: 1px solid #eee; gap: 8px; }
+            .name { white-space: normal; }
         }
     </style>
 </head>
@@ -143,8 +146,8 @@
         
         <div class="footer-btns">
             <button class="btn btn-gray" onclick="toggleCat(true)">📖 Catalogue</button>
-            <button class="btn btn-gray" onclick="exportData()">💾 Save</button>
-            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Load</button>
+            <button class="btn btn-gray" onclick="exportData()">💾 Sauvegarder</button>
+            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Charger</button>
             <button class="btn btn-orange" onclick="location.reload()">🔄 Actualiser</button>
             <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider Listes</button>
             <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
@@ -170,10 +173,10 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('courses_v25')) || { shops: [], budget: 0, catalogue: [] };
+    let db = JSON.parse(localStorage.getItem('courses_v26')) || { shops: [], budget: 0, catalogue: [] };
 
     function save() {
-        localStorage.setItem('courses_v25', JSON.stringify(db));
+        localStorage.setItem('courses_v26', JSON.stringify(db));
         render();
     }
 
@@ -285,7 +288,7 @@
                 const sub = it.qty * activePrice;
                 tG += sub; if(it.checked) cG += sub;
                 sSum += sub; if(it.checked) sCheck += sub;
-                const isMobile = window.innerWidth < 800;
+                const isMobile = window.innerWidth < 950;
                 
                 const innerRow = `
                     <div class="qty-ctrl">
@@ -293,22 +296,22 @@
                         <input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)">
                         <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:2px">
-                        <label style="font-size:0.5rem; color:#999">Prix habituel</label>
+                    <div style="display:flex; flex-direction:column; gap:1px">
+                        <label style="font-size:0.5rem; color:#999">Habituel</label>
                         <input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)">
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:2px">
-                        <label style="font-size:0.5rem; color:var(--promo-color)">Prix PROMO</label>
+                    <div style="display:flex; flex-direction:column; gap:1px">
+                        <label style="font-size:0.5rem; color:var(--promo-color); font-weight:bold">PROMO</label>
                         <input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)">
                     </div>
                     <div class="row-total">${sub.toFixed(2)}€</div>`;
 
                 if(!isMobile) {
                     return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
-                        <div><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
+                        <div class="col-check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
                         <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
                         ${innerRow}
-                        <div><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
+                        <div class="col-del" style="text-align:right"><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
                     </div>`;
                 } else {
                     return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
@@ -327,7 +330,7 @@
                     <div class="shop-actions">
                         <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
                         <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
-                        <button class="btn-clear-shop" onclick="clearShop(${s.id})">🗑️</button>
+                        <button class="btn-clear-shop" onclick="clearShop(${s.id})" title="Vider ce magasin">🗑️</button>
                         <button class="btn-del" style="font-size:1rem; margin-left:5px" onclick="delShop(${s.id})">✕</button>
                     </div>
                 </div>
