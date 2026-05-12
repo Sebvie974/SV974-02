@@ -2,285 +2,271 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Courses Expert - V5 Stable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Courses Pro - V9 Hybride</title>
     <style>
-        :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: #333; }
+        :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f4f7f6; }
         
-        /* HEADER FIXE */
-        .header { background: var(--dark); color: white; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .stats { display: flex; max-width: 1000px; margin: auto; justify-content: space-around; }
-        .stat-box { text-align: center; border-left: 1px solid #444; padding: 0 20px; }
-        .stat-box:first-child { border: none; }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; color: #bdc3c7; }
-        .stat-val { font-size: 1.4rem; font-weight: bold; display: block; }
-
-        /* PANNEAU DE CONTROLE */
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; color: #333; }
         
-        .grid-form { display: grid; grid-template-columns: 1fr 2fr auto; gap: 15px; align-items: flex-end; margin-bottom: 20px; }
-        label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        input:focus { border-color: var(--primary); outline: none; }
+        /* HEADER RESPONSIVE */
+        .header { background: var(--dark); color: white; padding: 10px; position: sticky; top: 0; z-index: 3000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .stats { display: flex; max-width: 1000px; margin: auto; justify-content: space-around; flex-wrap: wrap; }
+        .stat-box { flex: 1; min-width: 100px; padding: 5px; }
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #bdc3c7; display: block; }
+        .stat-val { font-size: 1.1rem; font-weight: bold; }
 
-        .btn { padding: 12px 25px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .container { max-width: 1000px; margin: 10px auto; padding: 0 10px; box-sizing: border-box; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        
+        /* FORMULAIRE ADAPTATIF */
+        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .col { display: flex; flex-direction: column; flex: 1; min-width: 140px; position: relative; }
+        label { font-size: 0.75rem; font-weight: bold; margin-bottom: 4px; color: #666; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        
+        .btn { padding: 12px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; white-space: nowrap; }
         .btn-add { background: var(--primary); }
         .btn-shop { background: #3498db; }
-        .btn-add:hover, .btn-shop:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* LISTE DES ARTICLES */
-        .shop-group { background: white; border-radius: 10px; overflow: hidden; margin-bottom: 30px; border: 1px solid #ddd; }
-        .shop-header { background: #f8f9fa; padding: 15px 25px; border-bottom: 2px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .shop-name { font-size: 1.2rem; font-weight: bold; color: var(--dark); }
-
-        .item-table { width: 100%; border-collapse: collapse; }
-        .item-row { border-bottom: 1px solid #eee; transition: 0.1s; }
-        .item-row:hover { background: #fffdf0; }
-        .item-row td { padding: 12px 20px; }
+        /* LISTE DES MAGASINS */
+        .shop-block { background: white; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+        .shop-header { background: #f8f9fa; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
         
-        .col-check { width: 40px; }
-        .col-name { font-weight: 600; font-size: 1.05rem; }
-        .col-qty { width: 130px; }
-        .col-price { width: 150px; }
-        .col-total { width: 100px; text-align: right; font-weight: bold; }
-        .col-del { width: 50px; text-align: center; }
+        /* TABLEAU PC */
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #fafafa; }
+        th { font-size: 0.7rem; text-transform: uppercase; color: #999; padding: 8px 15px; text-align: left; }
+        td { padding: 10px 15px; border-bottom: 1px solid #f1f1f1; }
+        
+        .item-name { font-weight: bold; font-size: 1rem; }
+        .checked-row { background: #f9f9f9; opacity: 0.6; }
+        .checked-row .item-name { text-decoration: line-through; }
 
-        /* INPUTS DANS TABLE */
-        .qty-ctrl { display: flex; border: 2px solid #ddd; border-radius: 4px; overflow: hidden; }
-        .qty-btn { background: #eee; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; }
-        .qty-val { width: 40px; text-align: center; border: none; background: white; font-weight: bold; }
-        .price-input { width: 80px; padding: 6px; border: 1px solid #ccc; text-align: right; border-radius: 4px; }
-
-        .checked-row { background: #f1f2f6 !important; opacity: 0.7; }
-        .checked-row .col-name { text-decoration: line-through; color: #7f8c8d; }
+        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; width: fit-content; background: white; }
+        .btn-q { padding: 5px 12px; border: none; background: #eee; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
+        .val-q { width: 35px; text-align: center; border: none; font-weight: bold; font-size: 1rem; }
+        .price-in { width: 75px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
 
         /* SUGGESTIONS */
-        .suggest-box { position: absolute; background: white; border: 1px solid #ccc; width: 100%; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; }
-        .suggest-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        .suggest-item:hover { background: #f1f1f1; }
+        #suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 4000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .s-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
 
-        .action-bar { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-alt { background: #7f8c8d; flex: 1; }
+        /* --- MODE SMARTPHONE (MEDIA QUERY) --- */
+        @media (max-width: 600px) {
+            thead { display: none; } /* On cache les titres du tableau */
+            
+            .item-row { 
+                display: flex; 
+                flex-direction: column; 
+                padding: 15px; 
+                position: relative; 
+                border-bottom: 5px solid #f4f7f6;
+            }
+            
+            .item-row td { display: block; border: none; padding: 5px 0; width: 100% !important; text-align: left !important; }
+            
+            .col-check { position: absolute; top: 15px; left: 10px; }
+            .item-name { margin-left: 35px; font-size: 1.1rem; margin-bottom: 10px; }
+            
+            .mobile-flex { display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+            
+            .col-del-btn { position: absolute; top: 10px; right: 10px; }
+        }
+
+        .danger-zone { margin-top: 30px; text-align: center; display: flex; gap: 10px; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="stats">
-        <div class="stat-box"><span class="stat-label">Total Liste</span><span id="total-price" class="stat-val">0.00 €</span></div>
-        <div class="stat-box"><span class="stat-label">Déjà en Panier</span><span id="checked-price" class="stat-val">0.00 €</span></div>
-        <div class="stat-box"><span class="stat-label">Reste (Budget)</span><span id="rem-budget" class="stat-val">0.00 €</span></div>
+        <div class="stat-box"><span class="stat-label">Total</span><span id="st-total">0.00 €</span></div>
+        <div class="stat-box"><span class="stat-label">Panier</span><span id="st-checked">0.00 €</span></div>
+        <div class="stat-box"><span class="stat-label">Reste</span><span id="st-rest">0.00 €</span></div>
     </div>
 </div>
 
 <div class="container">
     <div class="card">
-        <div class="grid-form">
-            <div>
-                <label>Votre Budget (€)</label>
-                <input type="number" id="budgetIn" placeholder="0.00" oninput="updateBudget(this.value)">
+        <div class="row">
+            <div class="col" style="flex: 0 0 90px;">
+                <label>Budget</label>
+                <input type="number" id="inBudget" step="0.01">
             </div>
-            <div>
-                <label>Ajouter un Magasin</label>
-                <input type="text" id="shopIn" placeholder="Ex: Intermarché, Boulangerie...">
+            <div class="col">
+                <label>Nouveau Magasin</label>
+                <input type="text" id="inShop" placeholder="Lidl, E.Leclerc...">
             </div>
-            <button class="btn btn-shop" onclick="addNewShop()">+ Créer Magasin</button>
+            <button class="btn btn-shop" onclick="addShop()">+ Créer</button>
         </div>
 
-        <div class="grid-form" style="position:relative;">
-            <div style="grid-column: span 1; position:relative;">
+        <div class="row">
+            <div class="col">
                 <label>Article</label>
-                <input type="text" id="itemIn" placeholder="Qu'est-ce qu'on achète ?" oninput="handleSuggest(this.value)">
-                <div id="suggestBox" class="suggest-box"></div>
+                <input type="text" id="inItem" placeholder="Pommes, Lait..." oninput="handleSuggest(this.value)">
+                <div id="suggestions"></div>
             </div>
-            <div>
-                <label>Destination</label>
-                <select id="shopSel"></select>
+            <div class="col" style="flex: 0 0 180px;">
+                <label>Magasin</label>
+                <select id="selShop"></select>
             </div>
-            <button class="btn btn-add" onclick="addNewItem()">Ajouter l'article</button>
+            <button class="btn btn-add" onclick="addItem()">OK</button>
         </div>
-
-        <div class="action-bar">
-            <button class="btn btn-alt" onclick="exportJSON()">💾 Sauvegarder fichier</button>
-            <button class="btn btn-alt" onclick="document.getElementById('fileInput').click()">📂 Charger fichier</button>
-            <input type="file" id="fileInput" style="display:none" onchange="importJSON(event)">
+        
+        <div class="row" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee">
+            <button class="btn" style="background:#95a5a6; flex:1;" onclick="exportData()">💾 Sauvegarder</button>
+            <button class="btn" style="background:#95a5a6; flex:1;" onclick="document.getElementById('fIn').click()">📂 Charger</button>
+            <input type="file" id="fIn" style="display:none" onchange="importData(event)">
         </div>
     </div>
 
-    <div id="displayArea"></div>
+    <div id="listZone"></div>
+
+    <div class="danger-zone">
+        <button class="btn" style="background:#e67e22; font-size:0.8rem" onclick="location.reload()">🔄 Actualiser</button>
+        <button class="btn" style="background:var(--danger); font-size:0.8rem" onclick="fullReset()">⚠️ Reset App</button>
+    </div>
 </div>
 
 <script>
-    // Initialisation robuste
-    let state = { shops: [], budget: 0, catalogue: [] };
-    const KEY = 'courses_v5_final';
+    const KEY = 'LISTE_V9_HYBRIDE';
+    let db = { shops: [], budget: 0, catalogue: [] };
 
     function init() {
         const saved = localStorage.getItem(KEY);
-        if(saved) {
+        if (saved) {
             try {
-                state = JSON.parse(saved);
-                if(!state.shops) state.shops = [];
-                if(!state.catalogue) state.catalogue = [];
-            } catch(e) { console.error("Reset des données corrompues"); }
+                const p = JSON.parse(saved);
+                db.shops = p.shops || [];
+                db.budget = p.budget || 0;
+                db.catalogue = p.catalogue || [];
+            } catch(e) {}
         }
         render();
     }
 
     function sync() {
-        localStorage.setItem(KEY, JSON.stringify(state));
+        localStorage.setItem(KEY, JSON.stringify(db));
         render();
     }
 
-    function updateBudget(v) { state.budget = parseFloat(v) || 0; sync(); }
-
-    function addNewShop() {
-        const val = document.getElementById('shopIn').value.trim();
-        if(val) {
-            state.shops.push({ id: Date.now(), name: val, items: [] });
-            document.getElementById('shopIn').value = "";
+    function addShop() {
+        const name = document.getElementById('inShop').value.trim();
+        if (name) {
+            db.shops.push({ id: Date.now(), name, items: [] });
+            document.getElementById('inShop').value = "";
             sync();
         }
     }
 
-    function addNewItem() {
-        const name = document.getElementById('itemIn').value.trim();
-        const shopId = document.getElementById('shopSel').value;
-        
-        if(!name || !shopId) {
-            alert("Veuillez saisir un nom d'article ET choisir un magasin.");
-            return;
-        }
+    function addItem() {
+        const name = document.getElementById('inItem').value.trim();
+        const sId = document.getElementById('selShop').value;
+        if (!name || !sId) { alert("Nom + Magasin requis"); return; }
 
-        const cat = state.catalogue.find(c => c.name.toLowerCase() === name.toLowerCase());
-        const price = cat ? cat.lastPrice : 0;
-
-        const shop = state.shops.find(s => s.id == shopId);
-        if(shop) {
-            shop.items.push({ id: Date.now(), name, qty: 1, price: price, checked: false });
-            if(!cat) state.catalogue.push({ name, lastPrice: price });
-            document.getElementById('itemIn').value = "";
+        const shop = db.shops.find(s => s.id == sId);
+        if (shop) {
+            const cat = db.catalogue.find(c => c.name.toLowerCase() === name.toLowerCase());
+            const price = cat ? cat.price : 0;
+            shop.items.push({ id: Date.now(), name, qty: 1, price, checked: false });
+            if (!cat) db.catalogue.push({ name, price });
+            document.getElementById('inItem').value = "";
             sync();
         }
     }
 
     function handleSuggest(v) {
-        const box = document.getElementById('suggestBox');
-        if(v.length < 1) { box.style.display = 'none'; return; }
-        const hits = state.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
-        if(hits.length === 0) { box.style.display = 'none'; return; }
-        box.innerHTML = hits.map(h => `
-            <div class="suggest-item" onclick="applySuggest('${h.name.replace(/'/g, "\\'")}')">
-                <span>${h.name}</span><b>${h.lastPrice.toFixed(2)}€</b>
-            </div>
-        `).join('');
+        const box = document.getElementById('suggestions');
+        if (v.length < 1) { box.style.display = 'none'; return; }
+        const hits = db.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
+        if (!hits.length) { box.style.display = 'none'; return; }
+        box.innerHTML = hits.map(h => `<div class="s-item" onclick="applySug('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${(h.price||0).toFixed(2)}€</b></div>`).join('');
         box.style.display = 'block';
     }
 
-    function applySuggest(n) {
-        document.getElementById('itemIn').value = n;
-        document.getElementById('suggestBox').style.display = 'none';
-    }
+    function applySug(n) { document.getElementById('inItem').value = n; document.getElementById('suggestions').style.display = 'none'; }
 
-    function modItem(sId, iId, task, val) {
-        const shop = state.shops.find(s => s.id == sId);
-        const item = shop.items.find(i => i.id == iId);
-        
-        if(task === 'qty') item.qty = Math.max(1, item.qty + val);
-        if(task === 'price') {
-            item.price = parseFloat(val) || 0;
-            let cat = state.catalogue.find(c => c.name.toLowerCase() === item.name.toLowerCase());
-            if(cat) cat.lastPrice = item.price;
+    function edit(sId, iId, task, val) {
+        const s = db.shops.find(x => x.id == sId);
+        const it = s.items.find(x => x.id == iId);
+        if (task === 'qty') it.qty = Math.max(1, it.qty + val);
+        if (task === 'check') it.checked = !it.checked;
+        if (task === 'price') {
+            it.price = parseFloat(val) || 0;
+            let c = db.catalogue.find(x => x.name.toLowerCase() === it.name.toLowerCase());
+            if (c) c.price = it.price;
         }
-        if(task === 'check') item.checked = !item.checked;
-        if(task === 'del') shop.items = shop.items.filter(i => i.id != iId);
-        
+        if (task === 'del') s.items = s.items.filter(x => x.id != iId);
         sync();
     }
 
     function render() {
-        const area = document.getElementById('displayArea');
-        const sel = document.getElementById('shopSel');
-        const curShop = sel.value;
-        
-        area.innerHTML = "";
-        sel.innerHTML = '<option value="">-- Sélectionner --</option>';
-        document.getElementById('budgetIn').value = state.budget || "";
+        const zone = document.getElementById('listZone');
+        const select = document.getElementById('selShop');
+        const curS = select.value;
+        zone.innerHTML = "";
+        select.innerHTML = '<option value="">-- Magasin --</option>';
+        document.getElementById('inBudget').value = db.budget;
 
         let totalG = 0, checkG = 0;
 
-        state.shops.forEach(shop => {
+        db.shops.forEach(s => {
             const opt = document.createElement('option');
-            opt.value = shop.id; opt.innerText = shop.name;
-            if(shop.id == curShop) opt.selected = true;
-            sel.appendChild(opt);
+            opt.value = s.id; opt.textContent = s.name;
+            if (s.id == curS) opt.selected = true;
+            select.appendChild(opt);
 
             let sSum = 0;
-            let rows = shop.items.map(it => {
+            const rows = s.items.map(it => {
                 const sub = it.qty * it.price;
-                totalG += sub;
-                if(it.checked) checkG += sub;
-                sSum += sub;
-
+                totalG += sub; if (it.checked) checkG += sub; sSum += sub;
                 return `
                 <tr class="item-row ${it.checked ? 'checked-row' : ''}">
-                    <td class="col-check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="modItem(${shop.id}, ${it.id}, 'check')"></td>
-                    <td class="col-name">${it.name}</td>
-                    <td class="col-qty">
+                    <td class="col-check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></td>
+                    <td class="item-name">${it.name}</td>
+                    <td class="mobile-flex">
                         <div class="qty-ctrl">
-                            <button class="qty-btn" onclick="modItem(${shop.id}, ${it.id}, 'qty', -1)">-</button>
-                            <input class="qty-val" readonly value="${it.qty}">
-                            <button class="qty-btn" onclick="modItem(${shop.id}, ${it.id}, 'qty', 1)">+</button>
+                            <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button>
+                            <input class="val-q" value="${it.qty}" readonly>
+                            <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button>
                         </div>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <input type="number" class="price-in" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"> €
+                        </div>
+                        <div style="font-weight:bold; min-width:60px; text-align:right;">${sub.toFixed(2)}€</div>
                     </td>
-                    <td class="col-price">
-                        <input type="number" class="price-input" step="0.01" value="${it.price || ''}" onblur="modItem(${shop.id}, ${it.id}, 'price', this.value)"> €
-                    </td>
-                    <td class="col-total">${sub.toFixed(2)}€</td>
-                    <td class="col-del"><button style="color:red; background:none; border:none; cursor:pointer; font-size:1.2rem" onclick="modItem(${shop.id}, ${it.id}, 'del')">×</button></td>
+                    <td class="col-del-btn" align="right"><button style="background:none; border:none; color:red; cursor:pointer; font-size:1.2rem" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></td>
                 </tr>`;
             }).join('');
 
-            area.innerHTML += `
-                <div class="shop-group">
-                    <div class="shop-header">
-                        <span class="shop-name">${shop.name}</span>
-                        <span style="font-weight:bold">Sous-total : ${sSum.toFixed(2)}€</span>
-                    </div>
-                    <table class="item-table">
-                        <tbody>${rows || '<tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">Aucun article ici</td></tr>'}</tbody>
-                    </table>
-                </div>`;
+            zone.innerHTML += `<div class="shop-block">
+                <div class="shop-header"><strong>${s.name}</strong><span>${sSum.toFixed(2)}€</span></div>
+                <table><thead><tr><th width="30"></th><th>Article</th><th>Détails (Qté / Prix / Total)</th><th width="40"></th></tr></thead>
+                <tbody>${rows || '<tr><td colspan="4" align="center" style="padding:15px; color:#999">Vide</td></tr>'}</tbody></table>
+            </div>`;
         });
 
-        document.getElementById('total-price').innerText = totalG.toFixed(2) + " €";
-        document.getElementById('checked-price').innerText = checkG.toFixed(2) + " €";
-        const rem = state.budget - checkG;
-        const rEl = document.getElementById('rem-budget');
-        rEl.innerText = rem.toFixed(2) + " €";
-        rEl.style.color = rem < 0 ? "#e74c3c" : "#2ecc71";
+        document.getElementById('st-total').textContent = totalG.toFixed(2) + " €";
+        document.getElementById('st-checked').textContent = checkG.toFixed(2) + " €";
+        const rem = db.budget - checkG;
+        const rEl = document.getElementById('st-rest');
+        rEl.textContent = rem.toFixed(2) + " €";
+        rEl.style.color = rem < 0 ? "var(--danger)" : "#2ecc71";
     }
 
-    function exportJSON() {
-        const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "ma_liste.json";
-        a.click();
+    function exportData() {
+        const blob = new Blob([JSON.stringify(db)], {type: "application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "courses.json"; a.click();
     }
-
-    function importJSON(e) {
+    function importData(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            try {
-                const j = JSON.parse(ev.target.result);
-                if(j.shops) state = j;
-                sync();
-            } catch(err) { alert("Erreur de fichier"); }
-        };
+        reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); sync(); } catch(err) {alert("Erreur");} };
         reader.readAsText(e.target.files[0]);
     }
+    function fullReset() { if(confirm("Tout effacer ?")) { localStorage.removeItem(KEY); location.reload(); } }
+    
+    document.getElementById('inBudget').addEventListener('change', (e) => { db.budget = parseFloat(e.target.value) || 0; sync(); });
 
     init();
 </script>
