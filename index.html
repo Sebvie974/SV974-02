@@ -3,256 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Courses Pro - V9 Hybride</title>
+    <title>Mes Courses Pro - V21</title>
     <style>
-        :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f4f7f6; }
+        :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; }
         
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; color: #333; }
-        
-        /* HEADER RESPONSIVE */
-        .header { background: var(--dark); color: white; padding: 10px; position: sticky; top: 0; z-index: 3000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .stats { display: flex; max-width: 1000px; margin: auto; justify-content: space-around; flex-wrap: wrap; }
-        .stat-box { flex: 1; min-width: 100px; padding: 5px; }
-        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #bdc3c7; display: block; }
-        .stat-val { font-size: 1.1rem; font-weight: bold; }
-
-        .container { max-width: 1000px; margin: 10px auto; padding: 0 10px; box-sizing: border-box; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        
-        /* FORMULAIRE ADAPTATIF */
-        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; flex-wrap: wrap; }
-        .col { display: flex; flex-direction: column; flex: 1; min-width: 140px; position: relative; }
-        label { font-size: 0.75rem; font-weight: bold; margin-bottom: 4px; color: #666; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; width: 100%; box-sizing: border-box; }
-        
-        .btn { padding: 12px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; white-space: nowrap; }
-        .btn-add { background: var(--primary); }
-        .btn-shop { background: #3498db; }
-
-        /* LISTE DES MAGASINS */
-        .shop-block { background: white; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-        .shop-header { background: #f8f9fa; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        
-        /* TABLEAU PC */
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: #fafafa; }
-        th { font-size: 0.7rem; text-transform: uppercase; color: #999; padding: 8px 15px; text-align: left; }
-        td { padding: 10px 15px; border-bottom: 1px solid #f1f1f1; }
-        
-        .item-name { font-weight: bold; font-size: 1rem; }
-        .checked-row { background: #f9f9f9; opacity: 0.6; }
-        .checked-row .item-name { text-decoration: line-through; }
-
-        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; width: fit-content; background: white; }
-        .btn-q { padding: 5px 12px; border: none; background: #eee; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
-        .val-q { width: 35px; text-align: center; border: none; font-weight: bold; font-size: 1rem; }
-        .price-in { width: 75px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
-
-        /* SUGGESTIONS */
-        #suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 4000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .s-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
-
-        /* --- MODE SMARTPHONE (MEDIA QUERY) --- */
-        @media (max-width: 600px) {
-            thead { display: none; } /* On cache les titres du tableau */
-            
-            .item-row { 
-                display: flex; 
-                flex-direction: column; 
-                padding: 15px; 
-                position: relative; 
-                border-bottom: 5px solid #f4f7f6;
-            }
-            
-            .item-row td { display: block; border: none; padding: 5px 0; width: 100% !important; text-align: left !important; }
-            
-            .col-check { position: absolute; top: 15px; left: 10px; }
-            .item-name { margin-left: 35px; font-size: 1.1rem; margin-bottom: 10px; }
-            
-            .mobile-flex { display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
-            
-            .col-del-btn { position: absolute; top: 10px; right: 10px; }
+        html, body { 
+            height: 100%; margin: 0; padding: 0; overflow: hidden; 
+            font-family: 'Segoe UI', sans-serif; background: var(--bg);
         }
 
-        .danger-zone { margin-top: 30px; text-align: center; display: flex; gap: 10px; justify-content: center; }
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+        /* BANDEAU SUPÉRIEUR IMMOBILE */
+        .fixed-header {
+            flex-shrink: 0; background: var(--bg); padding: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 9999;
+        }
+        
+        .stats-grid { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; 
+            background: var(--dark); color: white; padding: 12px; 
+            border-radius: 10px; text-align: center; max-width: 980px; margin: auto;
+        }
+        .stat-val { font-size: 1.1rem; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.8; }
+
+        .admin-section { flex-shrink: 0; max-width: 1000px; margin: 0 auto; width: 100%; }
+        .admin-card { background: #f1f1f1; padding: 15px; margin: 10px; border-radius: 10px; border: 1px solid #ddd; }
+
+        /* ZONE SCROLLABLE */
+        .scrollable-content {
+            flex-grow: 1; overflow-y: auto; padding-bottom: 50px;
+            max-width: 1000px; margin: 0 auto; width: 100%; -webkit-overflow-scrolling: touch;
+        }
+
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .col { display: flex; flex-direction: column; flex: 1; min-width: 120px; position: relative; }
+        label { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; color: #555; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box; height: 42px; }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; height: 42px; white-space: nowrap; }
+        .btn-ok { background: var(--primary); }
+        .btn-blue { background: var(--blue); }
+
+        /* MAGASINS */
+        .shop-area { margin: 20px 10px; border: 1px solid #ccc; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .shop-title-bar { 
+            background: #eee; padding: 12px 15px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 1px solid #ccc; position: sticky; top: 0; z-index: 100;
+        }
+        
+        .shop-actions { display: flex; gap: 8px; align-items: center; }
+        .badge { padding: 4px 8px; border-radius: 5px; color: white; font-size: 0.8rem; font-weight: bold; min-width: 60px; text-align: center; }
+        .bg-gray { background: var(--gray-dark); }
+        .bg-green { background: var(--primary); }
+        .btn-clear-shop { background: none; border: none; color: var(--orange); cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
+
+        /* ARTICLES */
+        .item-row { 
+            display: grid; grid-template-columns: 40px 1fr 130px 130px 80px 40px; 
+            align-items: center; padding: 10px; border-bottom: 1px solid #eee; gap: 10px; 
+        }
+        .is-checked { background: #f9f9f9; opacity: 0.6; }
+        .is-checked .name { text-decoration: line-through; color: #888; }
+        .name { font-weight: 600; font-size: 1rem; cursor: pointer; }
+
+        /* REDUCTION CASE A COCHER */
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        /* QUANTITE : SANS FLECHES ET PLUS LARGE */
+        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; width: fit-content; overflow: hidden; }
+        .btn-q { width: 32px; height: 35px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
+        
+        .in-q { 
+            width: 60px; text-align: center; border: none; font-weight: bold; font-size: 1rem; height: 35px; 
+            -moz-appearance: textfield; 
+        }
+        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+
+        .in-p { width: 70px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; }
+        .row-total { font-weight: bold; width: 70px; text-align: right; }
+        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.3rem; cursor: pointer; padding: 5px; }
+
+        #suggestBox { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 10000; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .s-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+
+        .footer-btns { display: flex; gap: 10px; padding: 10px; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; }
+        .btn-gray { background: var(--gray-dark); flex: 1; }
+
+        @media (max-width: 650px) {
+            .item-row { grid-template-columns: 35px 1fr 40px; grid-template-areas: "check name del" "extra extra extra"; gap: 5px; }
+            .extra-zone { grid-area: extra; display: flex; justify-content: space-between; align-items: center; background: #fdfdfd; padding: 5px; border-radius: 5px; border: 1px solid #eee; }
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="stats">
-        <div class="stat-box"><span class="stat-label">Total</span><span id="st-total">0.00 €</span></div>
-        <div class="stat-box"><span class="stat-label">Panier</span><span id="st-checked">0.00 €</span></div>
-        <div class="stat-box"><span class="stat-label">Reste</span><span id="st-rest">0.00 €</span></div>
-    </div>
-</div>
-
-<div class="container">
-    <div class="card">
-        <div class="row">
-            <div class="col" style="flex: 0 0 90px;">
-                <label>Budget</label>
-                <input type="number" id="inBudget" step="0.01">
-            </div>
-            <div class="col">
-                <label>Nouveau Magasin</label>
-                <input type="text" id="inShop" placeholder="Lidl, E.Leclerc...">
-            </div>
-            <button class="btn btn-shop" onclick="addShop()">+ Créer</button>
+<div class="app-wrapper">
+    <div class="fixed-header">
+        <div class="stats-grid">
+            <div><span class="stat-label">Prévu</span><span id="outTotal" class="stat-val">0.00 €</span></div>
+            <div><span class="stat-label">Panier</span><span id="outChecked" class="stat-val" style="color:#2ecc71">0.00 €</span></div>
+            <div><span class="stat-label">Reste</span><span id="outRest" class="stat-val">0.00 €</span></div>
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Article</label>
-                <input type="text" id="inItem" placeholder="Pommes, Lait..." oninput="handleSuggest(this.value)">
-                <div id="suggestions"></div>
+    <div class="admin-section">
+        <div class="admin-card">
+            <div class="input-row">
+                <div class="col" style="flex:0 0 85px">
+                    <label>Budget (€)</label>
+                    <input type="number" id="inBudget" step="0.01" onchange="upBudget(this.value)">
+                </div>
+                <div class="col">
+                    <label>Nouveau Magasin</label>
+                    <input type="text" id="inShop" placeholder="Leclerc, Lidl...">
+                </div>
+                <button class="btn btn-blue" onclick="addShop()">OK</button>
             </div>
-            <div class="col" style="flex: 0 0 180px;">
-                <label>Magasin</label>
-                <select id="selShop"></select>
+            <div class="input-row">
+                <div class="col">
+                    <label>Article</label>
+                    <input type="text" id="inItem" placeholder="Chercher/Ajouter..." oninput="doSuggest(this.value)">
+                    <div id="suggestBox"></div>
+                </div>
+                <div class="col" style="flex:0 0 150px">
+                    <label>Magasin</label>
+                    <select id="selShop"></select>
+                </div>
+                <button class="btn btn-ok" onclick="addItem()">OK</button>
             </div>
-            <button class="btn btn-add" onclick="addItem()">OK</button>
         </div>
         
-        <div class="row" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee">
-            <button class="btn" style="background:#95a5a6; flex:1;" onclick="exportData()">💾 Sauvegarder</button>
-            <button class="btn" style="background:#95a5a6; flex:1;" onclick="document.getElementById('fIn').click()">📂 Charger</button>
-            <input type="file" id="fIn" style="display:none" onchange="importData(event)">
+        <div class="footer-btns">
+            <button class="btn btn-gray" onclick="exportData()">💾 Sauvegarder</button>
+            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Charger</button>
+            <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider Tout</button>
+            <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
         </div>
     </div>
 
-    <div id="listZone"></div>
-
-    <div class="danger-zone">
-        <button class="btn" style="background:#e67e22; font-size:0.8rem" onclick="location.reload()">🔄 Actualiser</button>
-        <button class="btn" style="background:var(--danger); font-size:0.8rem" onclick="fullReset()">⚠️ Reset App</button>
-    </div>
+    <div class="scrollable-content" id="contentZone"></div>
 </div>
 
 <script>
-    const KEY = 'LISTE_V9_HYBRIDE';
-    let db = { shops: [], budget: 0, catalogue: [] };
+    let db = JSON.parse(localStorage.getItem('courses_v21')) || { shops: [], budget: 0, catalogue: [] };
 
-    function init() {
-        const saved = localStorage.getItem(KEY);
-        if (saved) {
-            try {
-                const p = JSON.parse(saved);
-                db.shops = p.shops || [];
-                db.budget = p.budget || 0;
-                db.catalogue = p.catalogue || [];
-            } catch(e) {}
-        }
+    function save() {
+        localStorage.setItem('courses_v21', JSON.stringify(db));
         render();
     }
 
-    function sync() {
-        localStorage.setItem(KEY, JSON.stringify(db));
-        render();
-    }
+    function upBudget(v) { db.budget = parseFloat(v) || 0; save(); }
 
     function addShop() {
-        const name = document.getElementById('inShop').value.trim();
-        if (name) {
-            db.shops.push({ id: Date.now(), name, items: [] });
+        const n = document.getElementById('inShop').value.trim();
+        if(n) {
+            db.shops.push({ id: Date.now(), name: n, items: [] });
             document.getElementById('inShop').value = "";
-            sync();
+            save();
         }
     }
 
     function addItem() {
-        const name = document.getElementById('inItem').value.trim();
+        const n = document.getElementById('inItem').value.trim();
         const sId = document.getElementById('selShop').value;
-        if (!name || !sId) { alert("Nom + Magasin requis"); return; }
-
+        if(!n || !sId) return;
         const shop = db.shops.find(s => s.id == sId);
-        if (shop) {
-            const cat = db.catalogue.find(c => c.name.toLowerCase() === name.toLowerCase());
-            const price = cat ? cat.price : 0;
-            shop.items.push({ id: Date.now(), name, qty: 1, price, checked: false });
-            if (!cat) db.catalogue.push({ name, price });
-            document.getElementById('inItem').value = "";
-            sync();
-        }
+        const cat = db.catalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
+        const price = cat ? cat.price : 0;
+        shop.items.push({ id: Date.now(), name: n, qty: 1, price: price, checked: false });
+        if(!cat) db.catalogue.push({ name: n, price: price });
+        document.getElementById('inItem').value = "";
+        save();
     }
 
-    function handleSuggest(v) {
-        const box = document.getElementById('suggestions');
-        if (v.length < 1) { box.style.display = 'none'; return; }
+    function doSuggest(v) {
+        const box = document.getElementById('suggestBox');
+        if(v.length < 1) { box.style.display = 'none'; return; }
         const hits = db.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
-        if (!hits.length) { box.style.display = 'none'; return; }
-        box.innerHTML = hits.map(h => `<div class="s-item" onclick="applySug('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${(h.price||0).toFixed(2)}€</b></div>`).join('');
+        if(!hits.length) { box.style.display = 'none'; return; }
+        box.innerHTML = hits.map(h => `<div class="s-item" onclick="setSug('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${h.price.toFixed(2)}€</b></div>`).join('');
         box.style.display = 'block';
     }
 
-    function applySug(n) { document.getElementById('inItem').value = n; document.getElementById('suggestions').style.display = 'none'; }
+    function setSug(n) { document.getElementById('inItem').value = n; document.getElementById('suggestBox').style.display = 'none'; }
 
     function edit(sId, iId, task, val) {
         const s = db.shops.find(x => x.id == sId);
         const it = s.items.find(x => x.id == iId);
-        if (task === 'qty') it.qty = Math.max(1, it.qty + val);
-        if (task === 'check') it.checked = !it.checked;
-        if (task === 'price') {
+        if(task === 'qty') it.qty = Math.max(0, parseFloat((it.qty + val).toFixed(2)));
+        if(task === 'qty_m') it.qty = Math.max(0, parseFloat(val) || 0);
+        if(task === 'check') it.checked = !it.checked;
+        if(task === 'price') {
             it.price = parseFloat(val) || 0;
             let c = db.catalogue.find(x => x.name.toLowerCase() === it.name.toLowerCase());
-            if (c) c.price = it.price;
+            if(c) c.price = it.price;
         }
-        if (task === 'del') s.items = s.items.filter(x => x.id != iId);
-        sync();
+        if(task === 'del') s.items = s.items.filter(x => x.id != iId);
+        save();
     }
 
+    function clearShop(sId) {
+        if(confirm("Vider les articles de ce magasin ?")) {
+            const s = db.shops.find(x => x.id == sId);
+            if(s) s.items = [];
+            save();
+        }
+    }
+
+    function delShop(id) { if(confirm("Supprimer ce magasin ?")) { db.shops = db.shops.filter(s => s.id != id); save(); } }
+    function clearAll() { if(confirm("Vider toutes les listes ?")) { db.shops.forEach(s => s.items = []); save(); } }
+
     function render() {
-        const zone = document.getElementById('listZone');
-        const select = document.getElementById('selShop');
-        const curS = select.value;
+        const zone = document.getElementById('contentZone');
+        const sel = document.getElementById('selShop');
+        const curS = sel.value;
         zone.innerHTML = "";
-        select.innerHTML = '<option value="">-- Magasin --</option>';
+        sel.innerHTML = db.shops.length ? "" : '<option value="">Magasin...</option>';
         document.getElementById('inBudget').value = db.budget;
 
-        let totalG = 0, checkG = 0;
+        let tG = 0, cG = 0;
 
         db.shops.forEach(s => {
             const opt = document.createElement('option');
             opt.value = s.id; opt.textContent = s.name;
-            if (s.id == curS) opt.selected = true;
-            select.appendChild(opt);
+            if(s.id == curS) opt.selected = true;
+            sel.appendChild(opt);
 
-            let sSum = 0;
-            const rows = s.items.map(it => {
+            let sSum = 0, sCheck = 0;
+            let itemsHtml = s.items.map(it => {
                 const sub = it.qty * it.price;
-                totalG += sub; if (it.checked) checkG += sub; sSum += sub;
-                return `
-                <tr class="item-row ${it.checked ? 'checked-row' : ''}">
-                    <td class="col-check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></td>
-                    <td class="item-name">${it.name}</td>
-                    <td class="mobile-flex">
-                        <div class="qty-ctrl">
-                            <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button>
-                            <input class="val-q" value="${it.qty}" readonly>
-                            <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <input type="number" class="price-in" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"> €
-                        </div>
-                        <div style="font-weight:bold; min-width:60px; text-align:right;">${sub.toFixed(2)}€</div>
-                    </td>
-                    <td class="col-del-btn" align="right"><button style="background:none; border:none; color:red; cursor:pointer; font-size:1.2rem" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></td>
-                </tr>`;
+                tG += sub; if(it.checked) cG += sub;
+                sSum += sub; if(it.checked) sCheck += sub;
+                const isMobile = window.innerWidth < 650;
+                
+                const innerRow = `
+                    <div class="qty-ctrl">
+                        <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button>
+                        <input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)">
+                        <button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:5px"><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)">€</div>
+                    <div class="row-total">${sub.toFixed(2)}€</div>
+                `;
+
+                if(!isMobile) {
+                    return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
+                        <div><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
+                        <div class="name" onclick="edit(${s.id}, ${it.id}, 'check')">${it.name}</div>
+                        ${innerRow}
+                        <div><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
+                    </div>`;
+                } else {
+                    return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
+                        <div style="grid-area:check"><input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')"></div>
+                        <div class="name" style="grid-area:name" onclick="edit(${s.id}, ${it.id}, 'check')">${it.name}</div>
+                        <div style="grid-area:del; text-align:right"><button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button></div>
+                        <div class="extra-zone">${innerRow}</div>
+                    </div>`;
+                }
             }).join('');
 
-            zone.innerHTML += `<div class="shop-block">
-                <div class="shop-header"><strong>${s.name}</strong><span>${sSum.toFixed(2)}€</span></div>
-                <table><thead><tr><th width="30"></th><th>Article</th><th>Détails (Qté / Prix / Total)</th><th width="40"></th></tr></thead>
-                <tbody>${rows || '<tr><td colspan="4" align="center" style="padding:15px; color:#999">Vide</td></tr>'}</tbody></table>
+            zone.innerHTML += `
+            <div class="shop-area">
+                <div class="shop-title-bar">
+                    <strong>${s.name}</strong>
+                    <div class="shop-actions">
+                        <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
+                        <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
+                        <button class="btn-clear-shop" onclick="clearShop(${s.id})">🗑️</button>
+                        <button class="btn-del" style="font-size:1rem; margin-left:5px" onclick="delShop(${s.id})">✕</button>
+                    </div>
+                </div>
+                <div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999">Aucun article</div>'}</div>
             </div>`;
         });
 
-        document.getElementById('st-total').textContent = totalG.toFixed(2) + " €";
-        document.getElementById('st-checked').textContent = checkG.toFixed(2) + " €";
-        const rem = db.budget - checkG;
-        const rEl = document.getElementById('st-rest');
-        rEl.textContent = rem.toFixed(2) + " €";
-        rEl.style.color = rem < 0 ? "var(--danger)" : "#2ecc71";
+        document.getElementById('outTotal').innerText = tG.toFixed(2) + " €";
+        document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
+        const rem = db.budget - cG;
+        const oR = document.getElementById('outRest');
+        oR.innerText = rem.toFixed(2) + " €";
+        oR.style.color = rem < 0 ? "red" : "#2ecc71";
     }
 
     function exportData() {
@@ -261,14 +302,11 @@
     }
     function importData(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); sync(); } catch(err) {alert("Erreur");} };
+        reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); save(); } catch(e) {alert("Erreur de chargement");} };
         reader.readAsText(e.target.files[0]);
     }
-    function fullReset() { if(confirm("Tout effacer ?")) { localStorage.removeItem(KEY); location.reload(); } }
-    
-    document.getElementById('inBudget').addEventListener('change', (e) => { db.budget = parseFloat(e.target.value) || 0; sync(); });
 
-    init();
+    render();
 </script>
 </body>
 </html>
