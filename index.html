@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses Pro</title>
+    <title>Mes Courses Pro + Catalogue Expert</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
@@ -22,6 +22,7 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 0; color: #333; margin: 0; overflow-x: hidden; }
         .container { max-width: 700px; margin: auto; background: white; min-height: 100vh; }
         
+        /* EN-TÊTE FIXE */
         .sticky-top {
             position: sticky;
             top: 0;
@@ -32,14 +33,8 @@
         }
 
         .header-total { 
-            background: var(--dark); 
-            color: white; 
-            padding: 10px; 
-            border-radius: 12px; 
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 10px;
+            background: var(--dark); color: white; padding: 10px; border-radius: 12px; 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;
         }
         .total-box { display: flex; flex-direction: column; align-items: center; border-right: 1px solid #444; text-align: center; }
         .total-box:last-child { border-right: none; }
@@ -54,7 +49,6 @@
         
         input, select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; min-width: 0; }
         
-        /* Correction largeur Nouveau Magasin */
         #budgetInput { width: 60px; font-weight: bold; flex-shrink: 0; }
         #shopInput { flex: 1; min-width: 80px; } 
         #itemInput { flex: 2; min-width: 100px; }
@@ -62,27 +56,44 @@
         
         .btn-add { flex-shrink: 0; background: var(--primary); color: white; border: none; font-weight: bold; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
 
+        /* CATALOGUE */
+        .catalogue-container { margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd; }
+        .catalogue-label { font-size: 0.7rem; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; display: block; }
+        .catalogue-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: 80px; overflow-y: auto; }
+        .cat-item { 
+            background: white; border: 1px solid #ccc; padding: 4px 8px; border-radius: 15px; 
+            font-size: 0.75rem; display: flex; align-items: center; gap: 5px; cursor: pointer;
+        }
+        .cat-item span { color: var(--dark); font-weight: 500; }
+        .cat-del { color: var(--danger); font-size: 0.8rem; font-weight: bold; padding: 0 2px; border-left: 1px solid #ddd; margin-left: 3px; }
+
+        /* MODALE DE SELECTION MAGASIN */
+        #shopModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 4000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin: 0 0 15px 0; font-size: 1rem; color: var(--dark); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-modal { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+
+        /* LISTE DES MAGASINS ET ARTICLES */
         .scrollable-content { padding: 10px; }
         .json-actions { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-        .btn-small { flex: 1; min-width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 8px; background: white; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .btn-small { flex: 1; min-width: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 8px; background: white; font-size: 0.75rem; font-weight: 600; }
 
         .shop-section { margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; background: #fff; }
-        
         .shop-header { 
-            position: sticky;
-            z-index: 2000;
-            background: #f1f1f1; 
-            padding: 10px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            cursor: pointer;
-            border-bottom: 1px solid #ddd;
-            border-radius: 10px 10px 0 0;
+            position: sticky; z-index: 2000; background: #f1f1f1; padding: 10px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            cursor: pointer; border-bottom: 1px solid #ddd; border-radius: 10px 10px 0 0;
         }
 
-        .shop-title { font-weight: bold; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .shop-badges { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .shop-title { font-weight: bold; font-size: 0.9rem; flex: 1; }
+        .shop-badges { display: flex; align-items: center; gap: 4px; }
         .shop-total-badge { color: white; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
         .badge-all { background: var(--dark); opacity: 0.7; }
         .badge-checked { background: var(--primary); }
@@ -93,15 +104,12 @@
         ul { list-style: none; padding: 0; margin: 0; }
         li { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f1f1; gap: 5px; }
         .item-main { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-        .item-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; }
+        .item-name { font-weight: 600; font-size: 0.95rem; }
         
-        /* Correction Grille contrôles article */
         .controls-grid { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 5px; }
-        
-        /* Correction taille boutons Quantité */
-        .qty-controls { display: flex; align-items: center; background: var(--gray); border-radius: 4px; border: 1px solid #ccc; overflow: hidden; flex-shrink: 0; }
+        .qty-controls { display: flex; align-items: center; background: var(--gray); border-radius: 4px; border: 1px solid #ccc; overflow: hidden; }
         .btn-qty { width: 28px; height: 28px; border: none; cursor: pointer; font-weight: bold; background: #eee; }
-        .qty-input { width: 35px; border: none; text-align: center; font-size: 0.85rem; height: 28px; background: white; padding: 0; }
+        .qty-input { width: 35px; border: none; text-align: center; font-size: 0.85rem; height: 28px; background: white; }
         
         .prices-row { display: flex; gap: 3px; align-items: center; justify-content: flex-end; }
         .price-input { width: 48px; padding: 4px; border: 1px solid #ccc; border-radius: 5px; text-align: right; font-size: 0.8rem; }
@@ -115,12 +123,24 @@
         
         .btn-icon { background: none; border: none; cursor: pointer; padding: 4px; font-size: 1rem; flex-shrink: 0; }
         .btn-del { color: var(--danger); }
-        
+        .btn-clear-shop { color: var(--promo); }
         .arrow { font-size: 0.6rem; transition: transform 0.2s; }
         .collapsed .arrow { transform: rotate(-90deg); }
     </style>
 </head>
 <body>
+
+<!-- MODALE DE SELECTION -->
+<div id="shopModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Ajouter l'article</h3>
+        <select id="modalShopSelect" style="width: 100%; padding: 12px; margin-bottom: 10px;"></select>
+        <div class="modal-actions">
+            <button class="btn-modal" style="background: #ccc;" onclick="closeModal()">Annuler</button>
+            <button class="btn-modal" style="background: var(--primary); color: white;" onclick="confirmAddFromCatalogue()">Ajouter</button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="sticky-top" id="mainHeader">
@@ -133,13 +153,18 @@
         <div class="admin-panel">
             <div class="input-group">
                 <input type="number" id="budgetInput" placeholder="Budget" inputmode="decimal" onchange="updateBudget(this.value)">
-                <input type="text" id="shopInput" placeholder="Nom magasin...">
+                <input type="text" id="shopInput" placeholder="Nouveau mag...">
                 <button class="btn-add" onclick="addShop()" style="background: var(--accent);">+ Mag</button>
             </div>
             <div class="input-group">
                 <input type="text" id="itemInput" placeholder="Article...">
                 <select id="shopSelect"></select>
                 <button class="btn-add" onclick="addItemFromUI()">OK</button>
+            </div>
+            
+            <div class="catalogue-container">
+                <span class="catalogue-label">📚 Catalogue (Cliquer pour ajouter)</span>
+                <div id="catalogueList" class="catalogue-list"></div>
             </div>
         </div>
     </div>
@@ -148,7 +173,7 @@
         <div class="json-actions">
             <button class="btn-small" onclick="exportJSON()">💾 Export</button>
             <button class="btn-small" onclick="triggerImport()">📂 Import</button>
-            <button class="btn-small" style="color:var(--danger)" onclick="clearAllItems()">🗑️ Vider</button>
+            <button class="btn-small" style="color:var(--danger)" onclick="clearAllItems()">🗑️ Tout vider</button>
             <input type="file" id="fileInput" accept="application/json" onchange="importJSON(event)" style="display:none">
         </div>
         <div id="masterList"></div>
@@ -156,7 +181,9 @@
 </div>
 
 <script>
-    let data = JSON.parse(localStorage.getItem('maListeCoursesV2')) || { shops: [], budgetMax: 0 };
+    let data = JSON.parse(localStorage.getItem('maListeCoursesV2')) || { shops: [], budgetMax: 0, catalogue: [] };
+    if (!data.catalogue) data.catalogue = [];
+    let pendingItem = "";
 
     function updateStickyPosition() {
         const h = document.getElementById('mainHeader').offsetHeight;
@@ -184,10 +211,54 @@
         const name = document.getElementById('itemInput').value.trim();
         const shopName = document.getElementById('shopSelect').value;
         if (!name || !shopName) return;
+        
         const shop = data.shops.find(s => s.name === shopName);
         shop.items.push({ name, qty: 1, price: 0, promo: 0, checked: false });
+        
+        if (!data.catalogue.includes(name)) {
+            data.catalogue.push(name);
+            data.catalogue.sort();
+        }
         document.getElementById('itemInput').value = "";
         saveAndRender();
+    }
+
+    // GESTION DU CATALOGUE AVEC MODALE
+    function openModal(itemName) {
+        pendingItem = itemName;
+        document.getElementById('modalTitle').innerText = `Ajouter "${itemName}" à :`;
+        const modalSelect = document.getElementById('modalShopSelect');
+        modalSelect.innerHTML = data.shops.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        
+        // Présélectionne le magasin du menu principal s'il existe
+        const mainSelectVal = document.getElementById('shopSelect').value;
+        if (mainSelectVal) modalSelect.value = mainSelectVal;
+
+        document.getElementById('shopModal').style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById('shopModal').style.display = "none";
+        pendingItem = "";
+    }
+
+    function confirmAddFromCatalogue() {
+        const targetShopName = document.getElementById('modalShopSelect').value;
+        if (!targetShopName) return;
+        const shop = data.shops.find(s => s.name === targetShopName);
+        if (shop) {
+            shop.items.push({ name: pendingItem, qty: 1, price: 0, promo: 0, checked: false });
+            saveAndRender();
+        }
+        closeModal();
+    }
+
+    function removeFromCatalogue(e, name) {
+        e.stopPropagation();
+        if(confirm(`Supprimer "${name}" du catalogue ?`)) {
+            data.catalogue = data.catalogue.filter(item => item !== name);
+            saveAndRender();
+        }
     }
 
     function saveAndRender() {
@@ -199,12 +270,20 @@
     function render() {
         const master = document.getElementById('masterList');
         const select = document.getElementById('shopSelect');
+        const catList = document.getElementById('catalogueList');
         const budgetInput = document.getElementById('budgetInput');
         const currentSelection = select.value;
         
         budgetInput.value = data.budgetMax || "";
         master.innerHTML = "";
         select.innerHTML = '<option value="">Magasin...</option>';
+
+        catList.innerHTML = data.catalogue.map(item => `
+            <div class="cat-item" onclick="openModal('${item.replace(/'/g, "\\'")}')">
+                <span>${item}</span>
+                <div class="cat-del" onclick="removeFromCatalogue(event, '${item.replace(/'/g, "\\'")}')">×</div>
+            </div>
+        `).join('');
 
         let grandTotal = 0, checkedTotalGlobal = 0;
 
@@ -255,6 +334,7 @@
                     <div class="shop-badges">
                         <span class="shop-total-badge badge-all">${shopTotalPrevu.toFixed(2)}€</span>
                         <span class="shop-total-badge badge-checked">🛒 ${shopTotalChecked.toFixed(2)}€</span>
+                        <button class="btn-icon btn-clear-shop" onclick="clearShopItems(event, ${sIdx})">🗑️</button>
                         <button class="btn-icon btn-del" onclick="deleteShop(event, ${sIdx})" style="color:#666">✕</button>
                     </div>
                 </div>
@@ -275,6 +355,7 @@
     function toggleItem(sIdx, iIdx) { data.shops[sIdx].items[iIdx].checked = !data.shops[sIdx].items[iIdx].checked; saveAndRender(); }
     function deleteItem(sIdx, iIdx) { data.shops[sIdx].items.splice(iIdx, 1); saveAndRender(); }
     function deleteShop(e, idx) { e.stopPropagation(); if(confirm("Supprimer le magasin ?")) { data.shops.splice(idx, 1); saveAndRender(); } }
+    function clearShopItems(e, sIdx) { e.stopPropagation(); if(confirm("Vider ce magasin ?")) { data.shops[sIdx].items = []; saveAndRender(); } }
     function clearAllItems() { if(confirm("Tout vider ?")) { data.shops.forEach(s => s.items = []); saveAndRender(); } }
     function editItemName(sIdx, iIdx) { const n = prompt("Nom ?", data.shops[sIdx].items[iIdx].name); if(n) { data.shops[sIdx].items[iIdx].name = n; saveAndRender(); } }
 
@@ -298,7 +379,7 @@
     function importJSON(e) {
         const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = res => { try { data = JSON.parse(res.target.result); saveAndRender(); } catch(e){alert("Erreur fichier");} };
+        reader.onload = res => { try { data = JSON.parse(res.target.result); if(!data.catalogue) data.catalogue=[]; saveAndRender(); } catch(e){alert("Erreur fichier");} };
         reader.readAsText(file);
     }
 
