@@ -3,103 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses Pro - V27 Mobile Fix</title>
+    <title>Mes Courses Pro - V28</title>
     <style>
         :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; --promo-color: #9b59b6; }
         
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: var(--bg); }
         .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
 
-        /* HEADER FIXE */
-        .fixed-header { flex-shrink: 0; background: var(--bg); padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 9999; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--dark); color: white; padding: 12px; border-radius: 10px; text-align: center; max-width: 980px; margin: auto; }
-        .stat-val { font-size: 1.1rem; font-weight: bold; display: block; }
-        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.8; }
+        .fixed-header { flex-shrink: 0; background: var(--bg); padding: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 9999; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--dark); color: white; padding: 10px; border-radius: 8px; text-align: center; max-width: 980px; margin: auto; }
+        .stat-val { font-size: 1rem; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.55rem; text-transform: uppercase; opacity: 0.8; }
 
         .admin-section { flex-shrink: 0; max-width: 1000px; margin: 0 auto; width: 100%; }
-        .admin-card { background: #f1f1f1; padding: 15px; margin: 10px; border-radius: 10px; border: 1px solid #ddd; }
+        .admin-card { background: #f1f1f1; padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid #ddd; }
 
-        /* ZONE SCROLLABLE */
         .scrollable-content { flex-grow: 1; overflow-y: auto; padding-bottom: 80px; max-width: 1000px; margin: 0 auto; width: 100%; -webkit-overflow-scrolling: touch; }
 
-        .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end; flex-wrap: wrap; }
-        .col { display: flex; flex-direction: column; flex: 1; min-width: 120px; position: relative; }
-        label { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; color: #555; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box; height: 42px; }
+        .input-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: flex-end; flex-wrap: wrap; }
+        .col { display: flex; flex-direction: column; flex: 1; min-width: 110px; position: relative; }
+        label { font-size: 0.65rem; font-weight: bold; margin-bottom: 2px; color: #555; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; width: 100%; box-sizing: border-box; height: 38px; }
         
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; height: 42px; white-space: nowrap; }
+        .btn { padding: 8px 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; height: 38px; white-space: nowrap; font-size: 0.85rem; }
         .btn-ok { background: var(--primary); }
         .btn-blue { background: var(--blue); }
         .btn-orange { background: var(--orange); }
 
-        /* MAGASINS */
-        .shop-area { margin: 15px 10px; border: 1px solid #ccc; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .shop-title-bar { background: #eee; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; position: sticky; top: 0; z-index: 100; }
-        .shop-actions { display: flex; gap: 8px; align-items: center; }
-        .badge { padding: 4px 8px; border-radius: 5px; color: white; font-size: 0.8rem; font-weight: bold; min-width: 55px; text-align: center; }
+        .shop-area { margin: 10px 8px; border: 1px solid #ccc; border-radius: 8px; background: white; }
+        .shop-title-bar { background: #eee; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; position: sticky; top: 0; z-index: 100; }
+        .badge { padding: 3px 6px; border-radius: 4px; color: white; font-size: 0.75rem; font-weight: bold; min-width: 50px; text-align: center; }
         .bg-gray { background: var(--gray-dark); }
         .bg-green { background: var(--primary); }
-        .btn-clear-shop { background: none; border: none; color: var(--orange); cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
 
-        /* ARTICLES - GRILLE PC */
-        .item-row { display: grid; grid-template-columns: 35px 1fr 125px 85px 85px 75px 35px; align-items: center; padding: 8px 10px; border-bottom: 1px solid #eee; gap: 8px; }
+        /* ARTICLES RÉDUITS */
+        .item-row { display: grid; grid-template-columns: 30px 1fr 110px 75px 75px 65px 30px; align-items: center; padding: 5px 8px; border-bottom: 1px solid #eee; gap: 6px; }
         .is-checked { background: #f9f9f9; opacity: 0.6; }
         .is-checked .name { text-decoration: line-through; color: #888; }
-        .name { font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+        .name { font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
-        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; display: block; margin: 0 auto; }
-        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; width: fit-content; overflow: hidden; }
-        .btn-q { width: 30px; height: 34px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
-        .in-q { width: 55px; text-align: center; border: none; font-weight: bold; font-size: 0.95rem; height: 34px; -moz-appearance: textfield; }
-        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="checkbox"] { width: 15px; height: 15px; }
+        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; overflow: hidden; scale: 0.9; }
+        .btn-q { width: 28px; height: 30px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
+        .in-q { width: 45px; text-align: center; border: none; font-weight: bold; font-size: 0.85rem; height: 30px; }
         
-        .in-p { width: 68px; padding: 5px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
-        .in-promo { border-color: var(--promo-color); color: var(--promo-color); font-weight: bold; }
-        .row-total { font-weight: bold; width: 65px; text-align: right; font-size: 0.95rem; }
-        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.3rem; cursor: pointer; }
-
-        /* MODAL */
-        #modalCat { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: none; align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 95%; max-width: 500px; max-height: 85vh; border-radius: 10px; display: flex; flex-direction: column; }
-        .modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { overflow-y: auto; padding: 10px; flex-grow: 1; }
-        .cat-add-row { display: flex; gap: 5px; padding: 10px; background: #f9f9f9; border-bottom: 1px solid #eee; }
-        .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f1f1; }
+        .in-p { width: 60px; padding: 4px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; }
+        .in-promo { border-color: var(--promo-color); color: var(--promo-color); }
+        .row-total { font-weight: bold; width: 60px; text-align: right; font-size: 0.85rem; }
+        .btn-del { background: none; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; }
 
         #suggestBox { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 10000; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .s-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+        .s-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.85rem; }
 
-        .footer-btns { display: flex; gap: 8px; padding: 10px; max-width: 1000px; margin: auto; width: 100%; box-sizing: border-box; flex-wrap: wrap;}
-        .btn-gray { background: var(--gray-dark); flex: 1; min-width: 90px;}
-
-        /* --- MODE SMARTPHONE DÉFINITIF --- */
+        /* MOBILE FIX */
         @media (max-width: 750px) {
-            .item-row { 
-                display: flex; 
-                flex-direction: column; 
-                align-items: stretch; 
-                padding: 12px; 
-                gap: 10px; 
-            }
-            .mobile-top-line { 
-                display: flex; 
-                align-items: center; 
-                gap: 12px; 
-            }
-            .mobile-bottom-line { 
-                display: grid; 
-                grid-template-columns: auto 1fr 1fr auto; 
-                align-items: center; 
-                gap: 8px; 
-                background: #f4f4f4; 
-                padding: 8px; 
-                border-radius: 8px; 
-            }
-            .name { flex-grow: 1; font-size: 1.1rem; white-space: normal; }
-            .col-check { flex-shrink: 0; }
-            .row-total { width: auto; color: var(--dark); font-size: 1.1rem; }
-            .price-field { display: flex; flex-direction: column; align-items: center; }
-            .price-field span { font-size: 0.6rem; text-transform: uppercase; color: #888; margin-bottom: 2px; }
+            .item-row { display: flex; flex-direction: column; align-items: stretch; padding: 8px; gap: 6px; }
+            .mobile-top-line { display: flex; align-items: center; gap: 8px; }
+            .mobile-bottom-line { display: grid; grid-template-columns: auto 1fr 1fr auto; align-items: center; gap: 5px; background: #f4f4f4; padding: 5px; border-radius: 6px; }
+            .name { font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -117,7 +78,7 @@
     <div class="admin-section">
         <div class="admin-card">
             <div class="input-row">
-                <div class="col" style="flex:0 0 85px">
+                <div class="col" style="flex:0 0 80px">
                     <label>Budget (€)</label>
                     <input type="number" id="inBudget" step="0.01" onchange="upBudget(this.value)">
                 </div>
@@ -130,10 +91,10 @@
             <div class="input-row">
                 <div class="col">
                     <label>Article</label>
-                    <input type="text" id="inItem" placeholder="Article à ajouter..." oninput="doSuggest(this.value)">
+                    <input type="text" id="inItem" placeholder="Saisir un produit..." oninput="doSuggest(this.value)">
                     <div id="suggestBox"></div>
                 </div>
-                <div class="col" style="flex:0 0 150px">
+                <div class="col" style="flex:0 0 140px">
                     <label>Magasin</label>
                     <select id="selShop"></select>
                 </div>
@@ -141,10 +102,10 @@
             </div>
         </div>
         
-        <div class="footer-btns">
-            <button class="btn btn-gray" onclick="toggleCat(true)">📖 Catalogue</button>
-            <button class="btn btn-gray" onclick="exportData()">💾 Save</button>
-            <button class="btn btn-gray" onclick="document.getElementById('fileIn').click()">📂 Load</button>
+        <div class="footer-btns" style="display:flex; gap:5px; padding:0 8px 8px 8px; flex-wrap:wrap;">
+            <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="toggleCat(true)">📖 Catalogue</button>
+            <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="exportData()">💾 Save</button>
+            <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="document.getElementById('fileIn').click()">📂 Load</button>
             <button class="btn btn-orange" onclick="location.reload()">🔄 Actualiser</button>
             <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider</button>
             <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
@@ -154,30 +115,46 @@
     <div class="scrollable-content" id="contentZone"></div>
 </div>
 
-<div id="modalCat">
-    <div class="modal-content">
-        <div class="modal-header"><strong>📖 Catalogue Produits</strong><button onclick="toggleCat(false)" style="border:none; background:none; font-size:1.5rem;">✕</button></div>
-        <div class="cat-add-row"><input type="text" id="catNewName" placeholder="Produit..." style="flex:2"><input type="number" id="catNewPrice" placeholder="Prix" style="flex:1" step="0.01"><button class="btn btn-ok" onclick="addDirectToCat()">+</button></div>
-        <div class="modal-body" id="catBody"></div>
+<div id="modalCat" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: none; align-items: center; justify-content: center;">
+    <div style="background: white; width: 95%; max-width: 500px; max-height: 85vh; border-radius: 10px; display: flex; flex-direction: column;">
+        <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+            <strong>📖 Catalogue</strong>
+            <button onclick="toggleCat(false)" style="border:none; background:none; font-size:1.5rem;">✕</button>
+        </div>
+        <div style="display: flex; gap: 5px; padding: 10px; background: #f9f9f9; border-bottom: 1px solid #eee;">
+            <input type="text" id="catNewName" placeholder="Produit..." style="flex:2">
+            <input type="number" id="catNewPrice" placeholder="Prix" style="flex:1" step="0.01">
+            <button class="btn btn-ok" onclick="addDirectToCat()">+</button>
+        </div>
+        <div id="catBody" style="overflow-y: auto; padding: 10px; flex-grow: 1;"></div>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('courses_v27')) || { shops: [], budget: 0, catalogue: [] };
+    let db = JSON.parse(localStorage.getItem('courses_v28')) || { shops: [], budget: 0, catalogue: [] };
 
-    function save() { localStorage.setItem('courses_v27', JSON.stringify(db)); render(); }
+    // SAUVEGARDE AVEC MAINTIEN DU SCROLL
+    function save() {
+        const scrollPos = document.getElementById('contentZone').scrollTop;
+        localStorage.setItem('courses_v28', JSON.stringify(db));
+        render();
+        document.getElementById('contentZone').scrollTop = scrollPos;
+    }
+
     function upBudget(v) { db.budget = parseFloat(v) || 0; save(); }
     function addShop() { const n = document.getElementById('inShop').value.trim(); if(n) { db.shops.push({ id: Date.now(), name: n, items: [] }); document.getElementById('inShop').value = ""; save(); } }
     
-    function addItem() {
-        const n = document.getElementById('inItem').value.trim();
+    function addItem(forcedName = null) {
+        const n = forcedName || document.getElementById('inItem').value.trim();
         const sId = document.getElementById('selShop').value;
-        if(!n || !sId) return;
+        if(!n || !sId) { if(forcedName) alert("Choisissez un magasin avant !"); return; }
         const shop = db.shops.find(s => s.id == sId);
         const cat = db.catalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
         shop.items.push({ id: Date.now(), name: n, qty: 1, price: cat?cat.price:0, promo: 0, checked: false });
         if(!cat) db.catalogue.push({ name: n, price: 0 });
-        document.getElementById('inItem').value = ""; save();
+        document.getElementById('inItem').value = ""; 
+        document.getElementById('suggestBox').style.display = 'none';
+        save();
     }
 
     function addDirectToCat() {
@@ -196,11 +173,10 @@
         if(v.length < 1) { box.style.display = 'none'; return; }
         const hits = db.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
         if(!hits.length) { box.style.display = 'none'; return; }
-        box.innerHTML = hits.map(h => `<div class="s-item" onclick="setSug('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${h.price.toFixed(2)}€</b></div>`).join('');
+        // AJOUT AUTO AU CLIC : on passe le nom à addItem directement
+        box.innerHTML = hits.map(h => `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${h.price.toFixed(2)}€</b></div>`).join('');
         box.style.display = 'block';
     }
-
-    function setSug(n) { document.getElementById('inItem').value = n; document.getElementById('suggestBox').style.display = 'none'; }
 
     function edit(sId, iId, task, val) {
         const s = db.shops.find(x => x.id == sId);
@@ -221,9 +197,9 @@
         if(show) {
             b.innerHTML = "";
             db.catalogue.sort((a,b) => a.name.localeCompare(b.name)).forEach((c, idx) => {
-                b.innerHTML += `<div class="cat-item"><span><b>${c.name}</b> <small>(${c.price.toFixed(2)}€)</small></span>
-                <div><button onclick="editCat(${idx})" style="color:var(--blue); border:none; background:none; font-size:1.1rem">✏️</button>
-                <button onclick="delCat(${idx})" style="color:var(--danger); border:none; background:none; font-size:1.1rem">✕</button></div></div>`;
+                b.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;"><span><b>${c.name}</b> <small>(${c.price.toFixed(2)}€)</small></span>
+                <div><button onclick="editCat(${idx})" style="color:var(--blue); border:none; background:none; cursor:pointer;">✏️</button>
+                <button onclick="delCat(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer;">✕</button></div></div>`;
             });
             m.style.display = 'flex';
         } else m.style.display = 'none';
@@ -231,8 +207,8 @@
 
     function editCat(idx) {
         const item = db.catalogue[idx];
-        const newN = prompt("Nouveau nom :", item.name);
-        const newP = prompt("Nouveau prix :", item.price);
+        const newN = prompt("Nom :", item.name);
+        const newP = prompt("Prix :", item.price);
         if(newN && newP !== null) { item.name = newN.trim(); item.price = parseFloat(newP) || 0; save(); toggleCat(true); }
     }
 
@@ -259,14 +235,17 @@
                 tG += sub; if(it.checked) cG += sub; sSum += sub; if(it.checked) sCheck += sub;
                 const isMobile = window.innerWidth < 750;
                 
+                const tools = `
+                    <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
+                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:#999">Habit.</label><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
+                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:var(--promo-color)">Promo</label><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
+                    <div class="row-total">${sub.toFixed(2)}€</div>`;
+
                 if(!isMobile) {
                     return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
                         <input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')">
                         <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
-                        <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
-                        <div class="price-field"><span>Habituel</span><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
-                        <div class="price-field"><span>Promo</span><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
-                        <div class="row-total">${sub.toFixed(2)}€</div>
+                        ${tools}
                         <button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button>
                     </div>`;
                 } else {
@@ -276,16 +255,11 @@
                             <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
                             <button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button>
                         </div>
-                        <div class="mobile-bottom-line">
-                            <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
-                            <div class="price-field"><span>Prix</span><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
-                            <div class="price-field"><span>Promo</span><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
-                            <div class="row-total">${sub.toFixed(2)}€</div>
-                        </div>
+                        <div class="mobile-bottom-line">${tools}</div>
                     </div>`;
                 }
             }).join('');
-            zone.innerHTML += `<div class="shop-area"><div class="shop-title-bar"><strong>${s.name}</strong><div class="shop-actions"><div class="badge bg-gray">${sSum.toFixed(2)}€</div><div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div><button class="btn-clear-shop" onclick="clearShop(${s.id})">🗑️</button><button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button></div></div><div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999">Aucun article</div>'}</div></div>`;
+            zone.innerHTML += `<div class="shop-area"><div class="shop-title-bar"><strong>${s.name}</strong><div style="display:flex; gap:5px; align-items:center;"><div class="badge bg-gray">${sSum.toFixed(2)}€</div><div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div><button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button><button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button></div></div><div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999; font-size:0.8rem;">Vide</div>'}</div></div>`;
         });
         const rem = db.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
         const oR = document.getElementById('outRest'); oR.innerText = rem.toFixed(2) + " €"; oR.style.color = rem < 0 ? "red" : "#2ecc71";
