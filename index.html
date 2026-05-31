@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mes Courses Pro - V28</title>
+    
+    <!-- Balises obligatoires pour le fonctionnement PWA / Icône Application -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Courses Pro">
+    <meta name="theme-color" content="#2c3e50">
+    
+    <title>Mes Courses Pro - V28.1 PWA</title>
     <style>
         :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; --promo-color: #9b59b6; }
         
@@ -36,7 +43,6 @@
         .bg-gray { background: var(--gray-dark); }
         .bg-green { background: var(--primary); }
 
-        /* ARTICLES RÉDUITS */
         .item-row { display: grid; grid-template-columns: 30px 1fr 110px 75px 75px 65px 30px; align-items: center; padding: 5px 8px; border-bottom: 1px solid #eee; gap: 6px; }
         .is-checked { background: #f9f9f9; opacity: 0.6; }
         .is-checked .name { text-decoration: line-through; color: #888; }
@@ -55,7 +61,6 @@
         #suggestBox { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 10000; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .s-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.85rem; }
 
-        /* MOBILE FIX */
         @media (max-width: 750px) {
             .item-row { display: flex; flex-direction: column; align-items: stretch; padding: 8px; gap: 6px; }
             .mobile-top-line { display: flex; align-items: center; gap: 8px; }
@@ -126,14 +131,13 @@
             <input type="number" id="catNewPrice" placeholder="Prix" style="flex:1" step="0.01">
             <button class="btn btn-ok" onclick="addDirectToCat()">+</button>
         </div>
-        <div id="catBody" style="overflow-y: auto; padding: 10px; flex-grow: 1;"></div>
+        <div id="catBody" style="overflow-y: auto; padding: 10px; flexgrow: 1;"></div>
     </div>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('courses_v28')) || { shops: [], budget: 0, catalogue: [] };
 
-    // SAUVEGARDE AVEC MAINTIEN DU SCROLL
     function save() {
         const scrollPos = document.getElementById('contentZone').scrollTop;
         localStorage.setItem('courses_v28', JSON.stringify(db));
@@ -173,7 +177,6 @@
         if(v.length < 1) { box.style.display = 'none'; return; }
         const hits = db.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
         if(!hits.length) { box.style.display = 'none'; return; }
-        // AJOUT AUTO AU CLIC : on passe le nom à addItem directement
         box.innerHTML = hits.map(h => `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${h.price.toFixed(2)}€</b></div>`).join('');
         box.style.display = 'block';
     }
