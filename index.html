@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="Courses Pro">
     <meta name="theme-color" content="#2c3e50">
     
-    <title>Mes Courses Pro - V31 Cloud</title>
+    <title>Mes Courses Pro - V32 Comparateur</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -84,6 +84,7 @@
 </head>
 <body>
 
+<!-- AUTHENTIFICATION -->
 <div id="authScreen" class="auth-container">
     <div class="auth-card">
         <h2 id="authTitle">Connexion</h2>
@@ -100,6 +101,7 @@
     </div>
 </div>
 
+<!-- APPLICATION -->
 <div id="appScreen" class="app-wrapper" style="display:none;">
     <div class="fixed-header">
         <div class="stats-grid">
@@ -148,63 +150,60 @@
     <div class="scrollable-content" id="contentZone"></div>
 </div>
 
+<!-- MODAL CATALOGUE COMPARATEUR -->
 <div id="modalCat" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: none; align-items: center; justify-content: center;">
     <div style="background: white; width: 95%; max-width: 500px; max-height: 85vh; border-radius: 10px; display: flex; flex-direction: column;">
         <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-            <strong>📖 Catalogue Commun</strong>
+            <strong>📖 Catalogue & Comparateur</strong>
             <button onclick="toggleCat(false)" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">✕</button>
         </div>
-        <div id="catBody" style="overflow-y: auto; padding: 10px; flex-grow: 1;"></div>
+        
+        <!-- Zone Ajout Direct -->
+        <div style="background:#f9f9f9; padding:10px; border-bottom:1px solid #eee;">
+            <div style="font-size:0.7rem; font-weight:bold; color:#555; margin-bottom:5px;">Ajouter directement au catalogue :</div>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                <input type="text" id="catNewName" placeholder="Produit..." style="flex:2; min-width:100px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                <select id="catNewShop" style="flex:1; min-width:100px; padding:8px; border:1px solid #ccc; border-radius:4px;"></select>
+                <input type="number" id="catNewPrice" placeholder="Prix" style="flex:1; max-width:70px; padding:8px; border:1px solid #ccc; border-radius:4px;" step="0.01">
+                <button class="btn btn-ok" onclick="addDirectToCat()" style="padding:8px 15px;">+</button>
+            </div>
+        </div>
+
+        <!-- Zone Recherche -->
+        <div style="padding:10px; border-bottom:1px solid #eee; background:white;">
+            <input type="text" id="catSearch" placeholder="🔍 Rechercher un produit..." oninput="renderCatList()" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        </div>
+
+        <!-- Liste Catalogue -->
+        <div id="catBody" style="overflow-y: auto; padding: 10px; flex-grow: 1; background:white;"></div>
     </div>
 </div>
 
 <script>
+    // --- PWA DYNAMIQUE ---
     (function initPWA() {
         const manifest = {
-            "name": "Mes Courses Pro",
-            "short_name": "Courses Pro",
-            "start_url": window.location.href.split('?')[0],
-            "display": "standalone",
-            "background_color": "#f8f9fa",
-            "theme_color": "#2c3e50",
-            "icons": [
-                {
-                    "src": "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2327ae60'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🛒</text></svg>",
-                    "sizes": "192x192",
-                    "type": "image/svg+xml",
-                    "purpose": "any maskable"
-                },
-                {
-                    "src": "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2327ae60'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🛒</text></svg>",
-                    "sizes": "512x512",
-                    "type": "image/svg+xml",
-                    "purpose": "any maskable"
-                }
-            ]
+            "name": "Mes Courses Pro", "short_name": "Courses Pro", "start_url": window.location.href.split('?')[0],
+            "display": "standalone", "background_color": "#f8f9fa", "theme_color": "#2c3e50",
+            "icons": [{ "src": "data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2327ae60'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🛒</text></svg>", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }]
         };
-        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = URL.createObjectURL(manifestBlob);
+        const link = document.createElement('link'); link.rel = 'manifest';
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'}));
         document.head.appendChild(link);
-
         if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', function(e) {});";
-            const swBlob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+            navigator.serviceWorker.register(URL.createObjectURL(new Blob(["self.addEventListener('fetch', function(e) {});"], {type: 'application/javascript'}))).catch(()=>{});
         }
     })();
 
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyDageL5yxmvfwQmoPLkBdy1Q86X0uVVxmA",
       authDomain: "courses-a9c65.firebaseapp.com",
       projectId: "courses-a9c65",
       storageBucket: "courses-a9c65.firebasestorage.app",
       messagingSenderId: "847747938532",
-      appId: "1:847747938532:web:6754196393d36588bc54f1",
-      measurementId: "G-1Y134LR8SH"
+      appId: "1:847747938532:web:6754196393d36588bc54f1"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const fs = firebase.firestore();
@@ -215,6 +214,7 @@
     let sharedCatalogue = [];
     let sharedShops = [];
 
+    // --- AUTHENTIFICATION ---
     function setAuthMode(mode) {
         authMode = mode;
         document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
@@ -224,22 +224,17 @@
     }
 
     function handleAuth() {
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
-        if(!email || !password) return alert("Veuillez remplir tous les champs.");
-        if (authMode === 'login') {
-            auth.signInWithEmailAndPassword(email, password).catch(err => alert("Erreur : " + err.message));
-        } else {
-            auth.createUserWithEmailAndPassword(email, password).catch(err => alert("Erreur : " + err.message));
-        }
+        const e = document.getElementById('authEmail').value.trim();
+        const p = document.getElementById('authPassword').value;
+        if(!e || !p) return alert("Champs requis.");
+        if (authMode === 'login') auth.signInWithEmailAndPassword(e, p).catch(err => alert("Erreur : " + err.message));
+        else auth.createUserWithEmailAndPassword(e, p).catch(err => alert("Erreur : " + err.message));
     }
 
     function handleForgotPassword() {
-        const email = document.getElementById('authEmail').value.trim();
-        if(!email) return alert("Saisissez votre e-mail dans le champ ci-dessus d'abord.");
-        auth.sendPasswordResetEmail(email)
-            .then(() => alert("E-mail de réinitialisation envoyé ! Vérifiez vos spams."))
-            .catch(err => alert("Erreur : " + err.message));
+        const e = document.getElementById('authEmail').value.trim();
+        if(!e) return alert("Saisissez votre e-mail d'abord.");
+        auth.sendPasswordResetEmail(e).then(() => alert("E-mail envoyé !")).catch(err => alert("Erreur : " + err.message));
     }
 
     auth.onAuthStateChanged(user => {
@@ -257,6 +252,8 @@
             fs.collection('global_catalogue').onSnapshot(snapshot => {
                 sharedCatalogue = [];
                 snapshot.forEach(doc => sharedCatalogue.push({ id: doc.id, ...doc.data() }));
+                // Met à jour la modale si elle est ouverte
+                if(document.getElementById('modalCat').style.display === 'flex') renderCatList();
             });
 
             fs.collection('global_shops').onSnapshot(snapshot => {
@@ -277,19 +274,17 @@
         }
     });
 
+    // --- DATA MANAGEMENT ---
     function cloudSave() {
         if (!currentUser) return;
         const scrollPos = document.getElementById('contentZone').scrollTop;
-        fs.collection('users_data').doc(currentUser.uid).set(userDb).then(() => {
-            document.getElementById('contentZone').scrollTop = scrollPos;
-        });
+        fs.collection('users_data').doc(currentUser.uid).set(userDb).then(() => { document.getElementById('contentZone').scrollTop = scrollPos; });
     }
 
     function updateSharedCatalogue(itemName, shopName, price) {
         if (!itemName) return;
         const normalized = itemName.trim();
         const docId = normalized.toLowerCase().replace(/[^a-z0-9]/g, "_");
-        
         fs.collection('global_catalogue').doc(docId).get().then(doc => {
             let pricesObj = {};
             if (doc.exists) pricesObj = doc.data().prices || {};
@@ -303,15 +298,10 @@
     function addShop() { 
         const n = document.getElementById('inShop').value.trim(); 
         if(n) { 
-            if (!userDb.shops.find(s => s.name.toLowerCase() === n.toLowerCase())) {
-                userDb.shops.push({ id: Date.now(), name: n, items: [] }); 
-            }
-            
+            if (!userDb.shops.find(s => s.name.toLowerCase() === n.toLowerCase())) userDb.shops.push({ id: Date.now(), name: n, items: [] }); 
             const docId = n.toLowerCase().replace(/[^a-z0-9]/g, "_");
             fs.collection('global_shops').doc(docId).set({ name: n }, { merge: true });
-            
-            document.getElementById('inShop').value = ""; 
-            cloudSave(); 
+            document.getElementById('inShop').value = ""; cloudSave(); 
         } 
     }
     
@@ -324,15 +314,12 @@
         const catItem = sharedCatalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
         
         let targetPrice = 0;
-        if (catItem && catItem.prices && catItem.prices[shop.name]) {
-            targetPrice = catItem.prices[shop.name];
-        }
+        if (catItem && catItem.prices && catItem.prices[shop.name]) targetPrice = catItem.prices[shop.name];
 
         shop.items.push({ id: Date.now(), name: n, qty: 1, price: targetPrice, promo: 0, checked: false });
         if(!catItem) updateSharedCatalogue(n, shop.name, 0);
         
-        document.getElementById('inItem').value = ""; 
-        document.getElementById('suggestBox').style.display = 'none';
+        document.getElementById('inItem').value = ""; document.getElementById('suggestBox').style.display = 'none';
         cloudSave();
     }
 
@@ -365,23 +352,89 @@
         cloudSave();
     }
 
+    // --- MODALE CATALOGUE ET COMPARATEUR ---
     function toggleCat(show) {
         const m = document.getElementById('modalCat');
-        const b = document.getElementById('catBody');
         if(show) {
-            b.innerHTML = "";
-            if (sharedCatalogue.length === 0) b.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>Le catalogue est encore vide.</div>";
-            sharedCatalogue.sort((a,b) => a.name.localeCompare(b.name)).forEach((c) => {
-                let pricesList = Object.entries(c.prices || {}).map(([shop, p]) => `<li>${shop} : ${p.toFixed(2)}€</li>`).join('');
-                b.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">
-                    <div style="font-weight:bold; color:var(--dark);">${c.name}</div>
-                    <ul style="margin:5px 0 0 15px; padding:0; font-size:0.8rem; color:#555;">${pricesList || '<li>Aucun prix enregistré</li>'}</ul>
-                </div>`;
-            });
+            // Remplir la liste des magasins pour l'ajout direct
+            const shopSelect = document.getElementById('catNewShop');
+            shopSelect.innerHTML = '<option value="">Magasin...</option>' + sharedShops.map(s => `<option value="${s}">${s}</option>`).join('');
+            
+            document.getElementById('catSearch').value = ""; // Reset recherche
+            renderCatList();
             m.style.display = 'flex';
-        } else m.style.display = 'none';
+        } else {
+            m.style.display = 'none';
+        }
     }
 
+    function addDirectToCat() {
+        const n = document.getElementById('catNewName').value.trim();
+        const s = document.getElementById('catNewShop').value;
+        const p = parseFloat(document.getElementById('catNewPrice').value) || 0;
+        
+        if(!n) return alert("Le nom du produit est requis.");
+        updateSharedCatalogue(n, s, p);
+        
+        document.getElementById('catNewName').value = ""; 
+        document.getElementById('catNewPrice').value = "";
+    }
+
+    function renderCatList() {
+        const b = document.getElementById('catBody');
+        const searchInput = document.getElementById('catSearch').value.toLowerCase();
+        
+        b.innerHTML = "";
+        
+        let filteredList = sharedCatalogue;
+        if(searchInput) {
+            filteredList = sharedCatalogue.filter(c => c.name.toLowerCase().includes(searchInput));
+        }
+
+        if (filteredList.length === 0) {
+            b.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>Aucun article trouvé.</div>";
+            return;
+        }
+
+        filteredList.sort((a,b) => a.name.localeCompare(b.name)).forEach((c) => {
+            const pricesObj = c.prices || {};
+            const shops = Object.keys(pricesObj);
+            
+            // Calcul du prix le moins cher (> 0)
+            let minPrice = Infinity;
+            shops.forEach(shop => {
+                if(pricesObj[shop] > 0 && pricesObj[shop] < minPrice) minPrice = pricesObj[shop];
+            });
+
+            // Création de la liste des prix avec surbrillance
+            let pricesHtml = shops.map(shop => {
+                const p = pricesObj[shop];
+                if(p === 0) return '';
+                const isMin = (p === minPrice);
+                const style = isMin ? 'color:var(--primary); font-weight:bold;' : 'color:#555;';
+                const badge = isMin ? ' <span style="background:var(--primary); color:white; padding:2px 5px; border-radius:4px; font-size:0.6rem; margin-left:5px;">Moins cher</span>' : '';
+                return `<li style="margin-bottom:3px; ${style}">${shop} : ${p.toFixed(2)}€${badge}</li>`;
+            }).join('');
+
+            b.innerHTML += `<div style="padding:12px 10px; border-bottom:1px solid #eee;">
+                <div style="font-weight:bold; color:var(--dark); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:1.05rem;">${c.name}</span>
+                    <button onclick="delCatItem('${c.id}')" style="color:var(--danger); border:none; background:none; cursor:pointer; font-size:0.8rem; padding:5px;">🗑️ Supprimer</button>
+                </div>
+                <ul style="margin:8px 0 0 15px; padding:0; font-size:0.85rem; list-style-type:square;">
+                    ${pricesHtml || '<li style="color:#999;">Aucun prix enregistré</li>'}
+                </ul>
+            </div>`;
+        });
+    }
+
+    function delCatItem(docId) {
+        if(confirm("Attention : Supprimer définitivement cet article du catalogue pour tout le monde ?")) {
+            fs.collection('global_catalogue').doc(docId).delete();
+        }
+    }
+
+    // --- RENDU PRINCIPAL ---
     function clearShop(sId) { if(confirm("Vider ce magasin ?")) { userDb.shops.find(x => x.id == sId).items = []; cloudSave(); } }
     function delShop(id) { if(confirm("Supprimer ce magasin ?")) { userDb.shops = userDb.shops.filter(s => s.id != id); cloudSave(); } }
     function clearAll() { if(confirm("Vider toutes les listes ?")) { userDb.shops.forEach(s => s.items = []); cloudSave(); } }
