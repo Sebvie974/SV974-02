@@ -4,17 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- PWA Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Courses Pro">
     <meta name="theme-color" content="#2c3e50">
     
-    <title>Mes Courses Pro - V29 PWA</title>
+    <title>Mes Courses Pro - V31 Cloud</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <style>
         :root { --primary: #27ae60; --danger: #e74c3c; --dark: #2c3e50; --bg: #f8f9fa; --blue: #3498db; --gray-dark: #7f8c8d; --orange: #f39c12; --promo-color: #9b59b6; }
         
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: var(--bg); }
         .app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+        .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--dark); padding: 20px; box-sizing: border-box; }
+        .auth-card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .auth-card h2 { margin-top: 0; color: var(--dark); text-align: center; margin-bottom: 20px; }
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .auth-tab { flex: 1; padding: 10px; border: none; background: #eee; cursor: pointer; font-weight: bold; border-radius: 6px; }
+        .auth-tab.active { background: var(--blue); color: white; }
 
         .fixed-header { flex-shrink: 0; background: var(--bg); padding: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 9999; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--dark); color: white; padding: 10px; border-radius: 8px; text-align: center; max-width: 980px; margin: auto; }
@@ -42,7 +55,6 @@
         .bg-gray { background: var(--gray-dark); }
         .bg-green { background: var(--primary); }
 
-        /* ARTICLES RÉDUITS PC */
         .item-row { display: grid; grid-template-columns: 30px 1fr 110px 75px 75px 65px 30px; align-items: center; padding: 5px 8px; border-bottom: 1px solid #eee; gap: 6px; }
         .is-checked { background: #f9f9f9; opacity: 0.6; }
         .is-checked .name { text-decoration: line-through; color: #888; }
@@ -62,7 +74,6 @@
         #suggestBox { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; z-index: 10000; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .s-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.85rem; }
 
-        /* MOBILE FIX */
         @media (max-width: 750px) {
             .item-row { display: flex; flex-direction: column; align-items: stretch; padding: 8px; gap: 6px; }
             .mobile-top-line { display: flex; align-items: center; gap: 8px; }
@@ -73,7 +84,23 @@
 </head>
 <body>
 
-<div class="app-wrapper">
+<div id="authScreen" class="auth-container">
+    <div class="auth-card">
+        <h2 id="authTitle">Connexion</h2>
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin" onclick="setAuthMode('login')">Se connecter</button>
+            <button class="auth-tab" id="tabRegister" onclick="setAuthMode('register')">S'inscrire</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <input type="email" id="authEmail" placeholder="Adresse e-mail">
+            <input type="password" id="authPassword" placeholder="Mot de passe">
+            <button class="btn btn-blue" id="authSubmit" onclick="handleAuth()" style="width:100%">Valider</button>
+            <button class="btn" style="background:none; color:var(--blue); font-size:0.8rem;" id="btnForgot" onclick="handleForgotPassword()">Mot de passe oublié ?</button>
+        </div>
+    </div>
+</div>
+
+<div id="appScreen" class="app-wrapper" style="display:none;">
     <div class="fixed-header">
         <div class="stats-grid">
             <div><span class="stat-label">Prévu</span><span id="outTotal" class="stat-val">0.00 €</span></div>
@@ -91,7 +118,8 @@
                 </div>
                 <div class="col">
                     <label>Nouveau Magasin</label>
-                    <input type="text" id="inShop" placeholder="Nom...">
+                    <input type="text" id="inShop" placeholder="Nom..." list="sharedShopsList">
+                    <datalist id="sharedShopsList"></datalist>
                 </div>
                 <button class="btn btn-blue" onclick="addShop()">OK</button>
             </div>
@@ -103,7 +131,7 @@
                 </div>
                 <div class="col" style="flex:0 0 140px">
                     <label>Magasin</label>
-                    <select id="selShop"></select>
+                    <select id="selShop" onchange="render()"></select>
                 </div>
                 <button class="btn btn-ok" onclick="addItem()">OK</button>
             </div>
@@ -111,11 +139,9 @@
         
         <div class="footer-btns" style="display:flex; gap:5px; padding:0 8px 8px 8px; flex-wrap:wrap;">
             <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="toggleCat(true)">📖 Catalogue</button>
-            <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="exportData()">💾 Save</button>
-            <button class="btn btn-gray" style="background:var(--gray-dark); flex:1" onclick="document.getElementById('fileIn').click()">📂 Load</button>
             <button class="btn btn-orange" onclick="location.reload()">🔄 Actualiser</button>
-            <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider</button>
-            <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
+            <button class="btn" style="background:var(--danger); flex:1" onclick="clearAll()">🗑️ Vider Listes</button>
+            <button class="btn" style="background:#7f8c8d;" onclick="firebase.auth().signOut()">🚪 Déco.</button>
         </div>
     </div>
 
@@ -125,20 +151,14 @@
 <div id="modalCat" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10001; display: none; align-items: center; justify-content: center;">
     <div style="background: white; width: 95%; max-width: 500px; max-height: 85vh; border-radius: 10px; display: flex; flex-direction: column;">
         <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-            <strong>📖 Catalogue</strong>
+            <strong>📖 Catalogue Commun</strong>
             <button onclick="toggleCat(false)" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">✕</button>
-        </div>
-        <div style="display: flex; gap: 5px; padding: 10px; background: #f9f9f9; border-bottom: 1px solid #eee;">
-            <input type="text" id="catNewName" placeholder="Produit..." style="flex:2">
-            <input type="number" id="catNewPrice" placeholder="Prix" style="flex:1" step="0.01">
-            <button class="btn btn-ok" onclick="addDirectToCat()">+</button>
         </div>
         <div id="catBody" style="overflow-y: auto; padding: 10px; flex-grow: 1;"></div>
     </div>
 </div>
 
 <script>
-    // --- PWA DYNAMIQUE (Génération Manifest & Service Worker à la volée) ---
     (function initPWA() {
         const manifest = {
             "name": "Mes Courses Pro",
@@ -171,68 +191,178 @@
         if ('serviceWorker' in navigator) {
             const swCode = "self.addEventListener('fetch', function(e) {});";
             const swBlob = new Blob([swCode], {type: 'application/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>console.log("SW non supporté localement"));
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
         }
     })();
-    // --- FIN PWA DYNAMIQUE ---
 
-    let db = JSON.parse(localStorage.getItem('courses_v29')) || { shops: [], budget: 0, catalogue: [] };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDageL5yxmvfwQmoPLkBdy1Q86X0uVVxmA",
+      authDomain: "courses-a9c65.firebaseapp.com",
+      projectId: "courses-a9c65",
+      storageBucket: "courses-a9c65.firebasestorage.app",
+      messagingSenderId: "847747938532",
+      appId: "1:847747938532:web:6754196393d36588bc54f1",
+      measurementId: "G-1Y134LR8SH"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const fs = firebase.firestore();
 
-    // SAUVEGARDE AVEC MAINTIEN DU SCROLL
-    function save() {
-        const scrollPos = document.getElementById('contentZone').scrollTop;
-        localStorage.setItem('courses_v29', JSON.stringify(db));
-        render();
-        document.getElementById('contentZone').scrollTop = scrollPos;
+    let currentUser = null;
+    let authMode = 'login';
+    let userDb = { shops: [], budget: 0 };
+    let sharedCatalogue = [];
+    let sharedShops = [];
+
+    function setAuthMode(mode) {
+        authMode = mode;
+        document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+        document.getElementById('authTitle').innerText = mode === 'login' ? 'Connexion' : 'Inscription';
+        document.getElementById('btnForgot').style.display = mode === 'login' ? 'block' : 'none';
     }
 
-    function upBudget(v) { db.budget = parseFloat(v) || 0; save(); }
-    function addShop() { const n = document.getElementById('inShop').value.trim(); if(n) { db.shops.push({ id: Date.now(), name: n, items: [] }); document.getElementById('inShop').value = ""; save(); } }
+    function handleAuth() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        if(!email || !password) return alert("Veuillez remplir tous les champs.");
+        if (authMode === 'login') {
+            auth.signInWithEmailAndPassword(email, password).catch(err => alert("Erreur : " + err.message));
+        } else {
+            auth.createUserWithEmailAndPassword(email, password).catch(err => alert("Erreur : " + err.message));
+        }
+    }
+
+    function handleForgotPassword() {
+        const email = document.getElementById('authEmail').value.trim();
+        if(!email) return alert("Saisissez votre e-mail dans le champ ci-dessus d'abord.");
+        auth.sendPasswordResetEmail(email)
+            .then(() => alert("E-mail de réinitialisation envoyé ! Vérifiez vos spams."))
+            .catch(err => alert("Erreur : " + err.message));
+    }
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'flex';
+            
+            fs.collection('users_data').doc(user.uid).onSnapshot(doc => {
+                if (doc.exists) userDb = doc.data();
+                else { userDb = { shops: [], budget: 0 }; fs.collection('users_data').doc(user.uid).set(userDb); }
+                render();
+            });
+
+            fs.collection('global_catalogue').onSnapshot(snapshot => {
+                sharedCatalogue = [];
+                snapshot.forEach(doc => sharedCatalogue.push({ id: doc.id, ...doc.data() }));
+            });
+
+            fs.collection('global_shops').onSnapshot(snapshot => {
+                sharedShops = [];
+                const dl = document.getElementById('sharedShopsList');
+                dl.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const sName = doc.data().name;
+                    sharedShops.push(sName);
+                    dl.innerHTML += `<option value="${sName}">`;
+                });
+            });
+
+        } else {
+            currentUser = null;
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+    });
+
+    function cloudSave() {
+        if (!currentUser) return;
+        const scrollPos = document.getElementById('contentZone').scrollTop;
+        fs.collection('users_data').doc(currentUser.uid).set(userDb).then(() => {
+            document.getElementById('contentZone').scrollTop = scrollPos;
+        });
+    }
+
+    function updateSharedCatalogue(itemName, shopName, price) {
+        if (!itemName) return;
+        const normalized = itemName.trim();
+        const docId = normalized.toLowerCase().replace(/[^a-z0-9]/g, "_");
+        
+        fs.collection('global_catalogue').doc(docId).get().then(doc => {
+            let pricesObj = {};
+            if (doc.exists) pricesObj = doc.data().prices || {};
+            if (shopName) pricesObj[shopName] = parseFloat(price) || 0;
+            fs.collection('global_catalogue').doc(docId).set({ name: normalized, prices: pricesObj }, { merge: true });
+        });
+    }
+
+    function upBudget(v) { userDb.budget = parseFloat(v) || 0; cloudSave(); }
+    
+    function addShop() { 
+        const n = document.getElementById('inShop').value.trim(); 
+        if(n) { 
+            if (!userDb.shops.find(s => s.name.toLowerCase() === n.toLowerCase())) {
+                userDb.shops.push({ id: Date.now(), name: n, items: [] }); 
+            }
+            
+            const docId = n.toLowerCase().replace(/[^a-z0-9]/g, "_");
+            fs.collection('global_shops').doc(docId).set({ name: n }, { merge: true });
+            
+            document.getElementById('inShop').value = ""; 
+            cloudSave(); 
+        } 
+    }
     
     function addItem(forcedName = null) {
         const n = forcedName || document.getElementById('inItem').value.trim();
         const sId = document.getElementById('selShop').value;
         if(!n || !sId) { if(forcedName) alert("Choisissez un magasin avant !"); return; }
-        const shop = db.shops.find(s => s.id == sId);
-        const cat = db.catalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
-        shop.items.push({ id: Date.now(), name: n, qty: 1, price: cat?cat.price:0, promo: 0, checked: false });
-        if(!cat) db.catalogue.push({ name: n, price: 0 });
+        
+        const shop = userDb.shops.find(s => s.id == sId);
+        const catItem = sharedCatalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
+        
+        let targetPrice = 0;
+        if (catItem && catItem.prices && catItem.prices[shop.name]) {
+            targetPrice = catItem.prices[shop.name];
+        }
+
+        shop.items.push({ id: Date.now(), name: n, qty: 1, price: targetPrice, promo: 0, checked: false });
+        if(!catItem) updateSharedCatalogue(n, shop.name, 0);
+        
         document.getElementById('inItem').value = ""; 
         document.getElementById('suggestBox').style.display = 'none';
-        save();
-    }
-
-    function addDirectToCat() {
-        const n = document.getElementById('catNewName').value.trim();
-        const p = parseFloat(document.getElementById('catNewPrice').value) || 0;
-        if(n) {
-            const exists = db.catalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
-            if(exists) exists.price = p; else db.catalogue.push({ name: n, price: p });
-            document.getElementById('catNewName').value = ""; document.getElementById('catNewPrice').value = "";
-            save(); toggleCat(true);
-        }
+        cloudSave();
     }
 
     function doSuggest(v) {
         const box = document.getElementById('suggestBox');
         if(v.length < 1) { box.style.display = 'none'; return; }
-        const hits = db.catalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
+        const hits = sharedCatalogue.filter(c => c.name.toLowerCase().includes(v.toLowerCase()));
         if(!hits.length) { box.style.display = 'none'; return; }
-        box.innerHTML = hits.map(h => `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${h.price.toFixed(2)}€</b></div>`).join('');
+        
+        const currentShopId = document.getElementById('selShop').value;
+        const currentShop = userDb.shops.find(s => s.id == currentShopId);
+        
+        box.innerHTML = hits.map(h => {
+            const shopPrice = (currentShop && h.prices && h.prices[currentShop.name]) ? h.prices[currentShop.name] : 0;
+            return `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${shopPrice > 0 ? shopPrice.toFixed(2)+'€' : '-- €'}</b></div>`;
+        }).join('');
         box.style.display = 'block';
     }
 
     function edit(sId, iId, task, val) {
-        const s = db.shops.find(x => x.id == sId);
+        const s = userDb.shops.find(x => x.id == sId);
         const it = s.items.find(x => x.id == iId);
         if(task === 'qty') it.qty = Math.max(0, parseFloat((it.qty + val).toFixed(2)));
         if(task === 'qty_m') it.qty = Math.max(0, parseFloat(val) || 0);
         if(task === 'check') it.checked = !it.checked;
         if(task === 'name') { const newN = prompt("Nom de l'article :", it.name); if(newN && newN.trim()) it.name = newN.trim(); }
-        if(task === 'price') { it.price = parseFloat(val) || 0; let c = db.catalogue.find(x => x.name.toLowerCase() === it.name.toLowerCase()); if(c) c.price = it.price; }
+        if(task === 'price') { it.price = parseFloat(val) || 0; updateSharedCatalogue(it.name, s.name, it.price); }
         if(task === 'promo') it.promo = parseFloat(val) || 0;
         if(task === 'del') s.items = s.items.filter(x => x.id != iId);
-        save();
+        cloudSave();
     }
 
     function toggleCat(show) {
@@ -240,37 +370,32 @@
         const b = document.getElementById('catBody');
         if(show) {
             b.innerHTML = "";
-            db.catalogue.sort((a,b) => a.name.localeCompare(b.name)).forEach((c, idx) => {
-                b.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;"><span><b>${c.name}</b> <small>(${c.price.toFixed(2)}€)</small></span>
-                <div><button onclick="editCat(${idx})" style="color:var(--blue); border:none; background:none; cursor:pointer;">✏️</button>
-                <button onclick="delCat(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer;">✕</button></div></div>`;
+            if (sharedCatalogue.length === 0) b.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>Le catalogue est encore vide.</div>";
+            sharedCatalogue.sort((a,b) => a.name.localeCompare(b.name)).forEach((c) => {
+                let pricesList = Object.entries(c.prices || {}).map(([shop, p]) => `<li>${shop} : ${p.toFixed(2)}€</li>`).join('');
+                b.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">
+                    <div style="font-weight:bold; color:var(--dark);">${c.name}</div>
+                    <ul style="margin:5px 0 0 15px; padding:0; font-size:0.8rem; color:#555;">${pricesList || '<li>Aucun prix enregistré</li>'}</ul>
+                </div>`;
             });
             m.style.display = 'flex';
         } else m.style.display = 'none';
     }
 
-    function editCat(idx) {
-        const item = db.catalogue[idx];
-        const newN = prompt("Nom :", item.name);
-        const newP = prompt("Prix :", item.price);
-        if(newN && newP !== null) { item.name = newN.trim(); item.price = parseFloat(newP) || 0; save(); toggleCat(true); }
-    }
-
-    function delCat(idx) { if(confirm("Supprimer ?")) { db.catalogue.splice(idx, 1); save(); toggleCat(true); } }
-    function clearShop(sId) { if(confirm("Vider ce magasin ?")) { db.shops.find(x => x.id == sId).items = []; save(); } }
-    function delShop(id) { if(confirm("Supprimer ce magasin ?")) { db.shops = db.shops.filter(s => s.id != id); save(); } }
-    function clearAll() { if(confirm("Vider toutes les listes ?")) { db.shops.forEach(s => s.items = []); save(); } }
+    function clearShop(sId) { if(confirm("Vider ce magasin ?")) { userDb.shops.find(x => x.id == sId).items = []; cloudSave(); } }
+    function delShop(id) { if(confirm("Supprimer ce magasin ?")) { userDb.shops = userDb.shops.filter(s => s.id != id); cloudSave(); } }
+    function clearAll() { if(confirm("Vider toutes les listes ?")) { userDb.shops.forEach(s => s.items = []); cloudSave(); } }
 
     function render() {
         const zone = document.getElementById('contentZone');
         const sel = document.getElementById('selShop');
         const curS = sel.value;
         zone.innerHTML = "";
-        sel.innerHTML = db.shops.length ? "" : '<option value="">Magasin...</option>';
-        document.getElementById('inBudget').value = db.budget;
+        sel.innerHTML = userDb.shops.length ? "" : '<option value="">Magasin...</option>';
+        document.getElementById('inBudget').value = userDb.budget || 0;
 
         let tG = 0, cG = 0;
-        db.shops.forEach(s => {
+        userDb.shops.forEach(s => {
             const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.name; if(s.id == curS) opt.selected = true; sel.appendChild(opt);
             let sSum = 0, sCheck = 0;
             let itemsHtml = s.items.map(it => {
@@ -281,7 +406,7 @@
                 
                 const tools = `
                     <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
-                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:#999">Habit.</label><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
+                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:#999">Enseigne (${s.name})</label><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
                     <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:var(--promo-color)">Promo</label><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
                     <div class="row-total">${sub.toFixed(2)}€</div>`;
 
@@ -305,13 +430,9 @@
             }).join('');
             zone.innerHTML += `<div class="shop-area"><div class="shop-title-bar"><strong>${s.name}</strong><div style="display:flex; gap:5px; align-items:center;"><div class="badge bg-gray">${sSum.toFixed(2)}€</div><div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div><button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button><button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button></div></div><div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999; font-size:0.8rem;">Vide</div>'}</div></div>`;
         });
-        const rem = db.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
+        const rem = userDb.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
         const oR = document.getElementById('outRest'); oR.innerText = rem.toFixed(2) + " €"; oR.style.color = rem < 0 ? "red" : "#2ecc71";
     }
-
-    function exportData() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], {type: "application/json"})); a.download = "courses.json"; a.click(); }
-    function importData(e) { const r = new FileReader(); r.onload = (ev) => { try { db = JSON.parse(ev.target.result); save(); } catch(e) {alert("Erreur");} }; r.readAsText(e.target.files[0]); }
-    render();
 </script>
 </body>
 </html>
