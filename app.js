@@ -414,14 +414,14 @@
         zone.innerHTML += `<div class="shop-area" id="shopArea-${s.id}">
                                 <div class="shop-title-bar">
                                     <strong>${s.name}</strong>
-                                    <div class="accordion">
-                                        <button class="accordion-button" onclick="toggleShopView(${s.id})">☰</button>
-                                    </div>
                                     <div style="display:flex; gap:5px; align-items:center;">
                                         <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
                                         <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
                                         <button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button>
                                         <button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button>
+                                        <div class="accordion">
+                                            <button class="accordion-button" onclick="toggleShopView(${s.id})">☰</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="shop-items" id="shopItems-${s.id}">
