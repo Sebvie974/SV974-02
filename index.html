@@ -61,10 +61,42 @@
         .name { font-weight: 600; font-size: 0.85rem; cursor: pointer; }
 
         input[type="checkbox"] { width: 15px; height: 15px; }
-        .qty-ctrl { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; background: white; overflow: hidden; scale: 0.9; }
-        .btn-q { width: 28px; height: 30px; border: none; background: #eee; cursor: pointer; font-weight: bold; }
-        .in-q { width: 45px; text-align: center; border: none; font-weight: bold; font-size: 0.85rem; height: 30px; -moz-appearance: textfield;}
-        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+            .qty-ctrl { 
+            display: flex; 
+        align-items: center; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        background: white; 
+        overflow: hidden; 
+        scale: 0.9; 
+        }
+
+        .btn-q { 
+        width: 28px; 
+        height: 30px; 
+        border: none; 
+        background: #eee; 
+        cursor: pointer; 
+        font-weight: bold; 
+        }
+
+        .in-q { 
+        width: 45px; 
+        text-align: center; 
+        border: none; 
+        font-weight: bold; 
+        font-size: 0.85rem; 
+        height: 30px; 
+        -moz-appearance: textfield; 
+        appearance: none; /* Ajoutez cette ligne pour la compatibilité WebKit */
+        padding: 0 5px; /* Ajoutez ce padding pour espacer le contenu du champ */
+        box-sizing: border-box; /* Assurez-vous que la largeur totale ne compte pas le padding */
+        }
+
+        .in-q::-webkit-outer-spin-button, .in-q::-webkit-inner-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+        }
         
         .in-p { width: 60px; padding: 4px; text-align: right; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; }
         .in-promo { border-color: var(--promo-color); color: var(--promo-color); }
@@ -80,6 +112,24 @@
             .mobile-bottom-line { display: grid; grid-template-columns: auto 1fr 1fr auto; align-items: center; gap: 5px; background: #f4f4f4; padding: 5px; border-radius: 6px; }
             .name { font-size: 0.9rem; flex-grow: 1; }
         }
+
+        .accordion-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+.accordion-button:hover {
+    color: var(--primary-hover);
+}
+
+.shop-items {
+    padding: 10px;
+    border-top: 1px solid #eee;
+}
+
     </style>
 </head>
 <body>
@@ -440,52 +490,74 @@
     function clearAll() { if(confirm("Vider toutes les listes ?")) { userDb.shops.forEach(s => s.items = []); cloudSave(); } }
 
     function render() {
-        const zone = document.getElementById('contentZone');
-        const sel = document.getElementById('selShop');
-        const curS = sel.value;
-        zone.innerHTML = "";
-        sel.innerHTML = userDb.shops.length ? "" : '<option value="">Magasin...</option>';
-        document.getElementById('inBudget').value = userDb.budget || 0;
+    const zone = document.getElementById('contentZone');
+    const sel = document.getElementById('selShop');
+    const curS = sel.value;
+    zone.innerHTML = "";
+    sel.innerHTML = userDb.shops.length ? "" : '<option value="">Magasin...</option>';
+    document.getElementById('inBudget').value = userDb.budget || 0;
 
-        let tG = 0, cG = 0;
-        userDb.shops.forEach(s => {
-            const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.name; if(s.id == curS) opt.selected = true; sel.appendChild(opt);
-            let sSum = 0, sCheck = 0;
-            let itemsHtml = s.items.map(it => {
-                const activePrice = (it.promo > 0) ? it.promo : it.price;
-                const sub = it.qty * activePrice;
-                tG += sub; if(it.checked) cG += sub; sSum += sub; if(it.checked) sCheck += sub;
-                const isMobile = window.innerWidth < 750;
-                
-                const tools = `
-                    <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
-                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:#999">Enseigne (${s.name})</label><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
-                    <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:var(--promo-color)">Promo</label><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
-                    <div class="row-total">${sub.toFixed(2)}€</div>`;
+    let tG = 0, cG = 0;
+    userDb.shops.forEach(s => {
+        const opt = document.createElement('option'); opt.value = s.id; opt.textContent = s.name; if(s.id == curS) opt.selected = true; sel.appendChild(opt);
+        let sSum = 0, sCheck = 0;
+        let itemsHtml = s.items.map(it => {
+            const activePrice = (it.promo > 0) ? it.promo : it.price;
+            const sub = it.qty * activePrice;
+            tG += sub; if(it.checked) cG += sub; sSum += sub; if(it.checked) sCheck += sub;
+            const isMobile = window.innerWidth < 750;
 
-                if(!isMobile) {
-                    return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
+            const tools = `
+                <div class="qty-ctrl"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', -1)">-</button><input type="number" step="any" class="in-q" value="${it.qty}" onchange="edit(${s.id}, ${it.id}, 'qty_m', this.value)"><button class="btn-q" onclick="edit(${s.id}, ${it.id}, 'qty', 1)">+</button></div>
+                <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:#999">Enseigne (${s.name})</label><input type="number" class="in-p" value="${it.price||''}" onblur="edit(${s.id}, ${it.id}, 'price', this.value)"></div>
+                <div style="display:flex; flex-direction:column;"><label style="font-size:0.45rem; color:var(--promo-color)">Promo</label><input type="number" class="in-p in-promo" value="${it.promo||''}" onblur="edit(${s.id}, ${it.id}, 'promo', this.value)"></div>
+                <div class="row-total">${sub.toFixed(2)}€</div>`;
+
+            if(!isMobile) {
+                return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
+                    <input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')">
+                    <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
+                    ${tools}
+                    <button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button>
+                </div>`;
+            } else {
+                return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
+                    <div class="mobile-top-line">
                         <input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')">
                         <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
-                        ${tools}
                         <button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button>
-                    </div>`;
-                } else {
-                    return `<div class="item-row ${it.checked ? 'is-checked' : ''}">
-                        <div class="mobile-top-line">
-                            <input type="checkbox" ${it.checked ? 'checked' : ''} onchange="edit(${s.id}, ${it.id}, 'check')">
-                            <div class="name" onclick="edit(${s.id}, ${it.id}, 'name')">${it.name}</div>
-                            <button class="btn-del" onclick="edit(${s.id}, ${it.id}, 'del')">✕</button>
-                        </div>
-                        <div class="mobile-bottom-line">${tools}</div>
-                    </div>`;
-                }
-            }).join('');
-            zone.innerHTML += `<div class="shop-area"><div class="shop-title-bar"><strong>${s.name}</strong><div style="display:flex; gap:5px; align-items:center;"><div class="badge bg-gray">${sSum.toFixed(2)}€</div><div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div><button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button><button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button></div></div><div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999; font-size:0.8rem;">Vide</div>'}</div></div>`;
-        });
-        const rem = userDb.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
-        const oR = document.getElementById('outRest'); oR.innerText = rem.toFixed(2) + " €"; oR.style.color = rem < 0 ? "red" : "#2ecc71";
-    }
+                    </div>
+                    <div class="mobile-bottom-line">${tools}</div>
+                </div>`;
+            }
+        }).join('');
+        zone.innerHTML += `<div class="shop-area">
+                            <div class="shop-title-bar">
+                                <strong>${s.name}</strong>
+                                <div class="accordion">
+                                    <button class="accordion-button" onclick="toggleAccordion(this)">☰</button>
+                                </div>
+                                <div style="display:flex; gap:5px; align-items:center;">
+                                    <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
+                                    <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
+                                    <button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button>
+                                    <button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button>
+                                </div>
+                            </div>
+                            <div class="shop-items" style="display:none;">
+                                <div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999; font-size:0.8rem;">Vide</div>'}</div>
+                            </div>
+                        </div>`;
+    });
+    const rem = userDb.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
+    const oR = document.getElementById('outRest'); oR.innerText = rem.toFixed(2) + " €"; oR.style.color = rem < 0 ? "red" : "#2ecc71";
+}
+
+//Fonction du Menu Accordéon
+function toggleAccordion(button) {
+    const items = button.nextElementSibling.nextElementSibling; // Access the .shop-items div
+    items.style.display = items.style.display === 'none' ? 'block' : 'none';
+}
 </script>
 </body>
 </html>
