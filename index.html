@@ -531,32 +531,45 @@
                 </div>`;
             }
         }).join('');
-        zone.innerHTML += `<div class="shop-area">
-                            <div class="shop-title-bar">
-                                <strong>${s.name}</strong>
-                                <div class="accordion">
-                                    <button class="accordion-button" onclick="toggleAccordion(this)">☰</button>
+        zone.innerHTML += `<div class="shop-area" id="shopArea-${s.id}">
+                                <div class="shop-title-bar">
+                                    <strong>${s.name}</strong>
+                                    <div class="accordion">
+                                        <button class="accordion-button" onclick="toggleAccordion(this)">☰</button>
+                                    </div>
+                                    <div style="display:flex; gap:5px; align-items:center;">
+                                        <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
+                                        <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
+                                        <button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button>
+                                        <button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button>
+                                    </div>
                                 </div>
-                                <div style="display:flex; gap:5px; align-items:center;">
-                                    <div class="badge bg-gray">${sSum.toFixed(2)}€</div>
-                                    <div class="badge bg-green">🛒 ${sCheck.toFixed(2)}€</div>
-                                    <button onclick="clearShop(${s.id})" style="background:none; border:none; color:var(--orange); cursor:pointer; font-size:1.1rem">🗑️</button>
-                                    <button class="btn-del" style="font-size:1rem" onclick="delShop(${s.id})">✕</button>
-                                </div>
-                            </div>
-                            <div class="shop-items" style="display:none;">
+                                <div class="shop-items" style="display:none;">
                                 <div>${itemsHtml || '<div style="padding:15px; text-align:center; color:#999; font-size:0.8rem;">Vide</div>'}</div>
-                            </div>
-                        </div>`;
+                                </div>
+                            </div>`;
     });
     const rem = userDb.budget - cG; document.getElementById('outTotal').innerText = tG.toFixed(2) + " €"; document.getElementById('outChecked').innerText = cG.toFixed(2) + " €";
     const oR = document.getElementById('outRest'); oR.innerText = rem.toFixed(2) + " €"; oR.style.color = rem < 0 ? "red" : "#2ecc71";
 }
 
-//Fonction du Menu Accordéon
+
+// Fonction pour ouvrir ou fermer la vue d'un magasin
+function toggleShopView(shopId) {
+    const shopArea = document.getElementById(`shopArea-${shopId}`);
+    shopArea.style.display = shopArea.style.display === 'none' ? 'block' : 'none';
+}
+
+// Fonction pour gérer l'affichage des magasins
+function toggleShops() {
+    const shopAreas = document.querySelectorAll('.shop-area');
+    shopAreas.forEach(area => area.style.display = area.style.display === 'none' ? 'block' : 'none');
+}
+
+// Fonction pour gérer l'affichage de l'accordéon d'un magasin
 function toggleAccordion(button) {
-    const items = button.nextElementSibling.nextElementSibling; // Access the .shop-items div
-    items.style.display = items.style.display === 'none' ? 'block' : 'none';
+    const shopId = button.closest('.shop-area').id.replace('shopArea-', '');
+    toggleShopView(shopId);
 }
 </script>
 </body>
