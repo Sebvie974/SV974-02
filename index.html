@@ -348,6 +348,65 @@
     }
 
     function upBudget(v) { userDb.budget = parseFloat(v) || 0; cloudSave(); }
+
+    // --- PROMOTIONS PAR PÉRIODE (catalogue) ---
+    // Format stocké dans chaque produit du catalogue : promos: { "Magasin": [ { price, from, to }, ... ] }
+    function todayStr() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function fmtDate(s) { return s ? s.split('-').reverse().join('/') : ''; }
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+    function encShop(s) { return encodeURIComponent(s).replace(/'/g, '%27'); }
+
+    function promoStatus(p) {
+        const t = todayStr();
+        if (t < p.from) return 'future';
+        if (t > p.to) return 'past';
+        return 'active';
+    }
+    // Promo en cours (la moins chère) pour un produit du catalogue dans un magasin, sinon null
+    function getActivePromo(item, shop) {
+        const list = (item && item.promos && item.promos[shop]) || [];
+        const actives = list.filter(p => promoStatus(p) === 'active' && p.price > 0);
+        if (!actives.length) return null;
+        return actives.reduce((m, p) => p.price < m.price ? p : m);
+    }
+
+    function addPromoToCat(docId) {
+        const item = sharedCatalogue.find(c => c.id === docId);
+        if (!item) return;
+        const shop = document.getElementById('promoShop-' + docId).value;
+        const price = parseFloat(document.getElementById('promoPrice-' + docId).value);
+        const from = document.getElementById('promoFrom-' + docId).value;
+        const to = document.getElementById('promoTo-' + docId).value;
+        if (!shop) return alert("Choisissez un magasin pour la promo.");
+        if (!(price > 0)) return alert("Indiquez le prix promo.");
+        if (!from || !to) return alert("Indiquez la date de début et la date de fin.");
+        if (to < from) return alert("La date de fin doit être après la date de début.");
+        const promos = JSON.parse(JSON.stringify(item.promos || {}));
+        if (!promos[shop]) promos[shop] = [];
+        promos[shop].push({ price: price, from: from, to: to });
+        fs.collection('global_catalogue').doc(docId).update({ promos: promos });
+    }
+
+    function delPromoFromCat(docId, encodedShop, idx) {
+        const item = sharedCatalogue.find(c => c.id === docId);
+        if (!item || !item.promos) return;
+        const shop = decodeURIComponent(encodedShop);
+        if (!confirm("Supprimer cette promotion ?")) return;
+        const promos = JSON.parse(JSON.stringify(item.promos));
+        if (!promos[shop]) return;
+        promos[shop].splice(idx, 1);
+        if (promos[shop].length === 0) delete promos[shop];
+        fs.collection('global_catalogue').doc(docId).update({ promos: promos });
+    }
+
+    let openPromoId = null; // produit dont le panneau promos est ouvert
+    function togglePromoPanel(docId) {
+        openPromoId = (openPromoId === docId) ? null : docId;
+        renderCatList();
+    }
     
     function addShop() { 
         const n = document.getElementById('inShop').value.trim(); 
@@ -367,10 +426,12 @@
         const shop = userDb.shops.find(s => s.id == sId);
         const catItem = sharedCatalogue.find(c => c.name.toLowerCase() === n.toLowerCase());
         
-        let targetPrice = 0;
+        let targetPrice = 0, targetPromo = 0;
         if (catItem && catItem.prices && catItem.prices[shop.name]) targetPrice = catItem.prices[shop.name];
+        const activePromo = catItem ? getActivePromo(catItem, shop.name) : null;
+        if (activePromo) targetPromo = activePromo.price;
 
-        shop.items.push({ id: Date.now(), name: n, qty: 1, price: targetPrice, promo: 0, checked: false });
+        shop.items.push({ id: Date.now(), name: n, qty: 1, price: targetPrice, promo: targetPromo, checked: false });
         if(!catItem) updateSharedCatalogue(n, shop.name, 0);
         
         document.getElementById('inItem').value = ""; document.getElementById('suggestBox').style.display = 'none';
@@ -387,8 +448,9 @@
         const currentShop = userDb.shops.find(s => s.id == currentShopId);
         
         box.innerHTML = hits.map(h => {
-            const shopPrice = (currentShop && h.prices && h.prices[currentShop.name]) ? h.prices[currentShop.name] : 0;
-            return `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b>${shopPrice > 0 ? shopPrice.toFixed(2)+'€' : '-- €'}</b></div>`;
+            const sp = currentShop ? getActivePromo(h, currentShop.name) : null;
+            const shopPrice = sp ? sp.price : ((currentShop && h.prices && h.prices[currentShop.name]) ? h.prices[currentShop.name] : 0);
+            return `<div class="s-item" onclick="addItem('${h.name.replace(/'/g, "\\'")}')"><span>${h.name}</span><b${sp ? ' style="color:var(--promo-color)"' : ''}>${shopPrice > 0 ? shopPrice.toFixed(2)+'€' + (sp ? ' 🏷️' : '') : '-- €'}</b></div>`;
         }).join('');
         box.style.display = 'block';
     }
@@ -418,6 +480,7 @@
             renderCatList();
             m.style.display = 'flex';
         } else {
+            openPromoId = null;
             m.style.display = 'none';
         }
     }
@@ -452,32 +515,81 @@
 
         filteredList.sort((a,b) => a.name.localeCompare(b.name)).forEach((c) => {
             const pricesObj = c.prices || {};
-            const shops = Object.keys(pricesObj);
-            
-            // Calcul du prix le moins cher (> 0)
+            const promosObj = c.promos || {};
+            const shops = Array.from(new Set(Object.keys(pricesObj).concat(Object.keys(promosObj))));
+
+            // Prix effectif par magasin : promo en cours si elle existe, sinon prix normal
+            const eff = {};
+            shops.forEach(shop => {
+                const ap = getActivePromo(c, shop);
+                eff[shop] = ap ? ap.price : (pricesObj[shop] || 0);
+            });
+
+            // Calcul du prix le moins cher (> 0), promos comprises
             let minPrice = Infinity;
             shops.forEach(shop => {
-                if(pricesObj[shop] > 0 && pricesObj[shop] < minPrice) minPrice = pricesObj[shop];
+                if(eff[shop] > 0 && eff[shop] < minPrice) minPrice = eff[shop];
             });
 
             // Création de la liste des prix avec surbrillance
             let pricesHtml = shops.map(shop => {
-                const p = pricesObj[shop];
-                if(p === 0) return '';
+                const ap = getActivePromo(c, shop);
+                const p = eff[shop];
+                if(!(p > 0)) return '';
                 const isMin = (p === minPrice);
                 const style = isMin ? 'color:var(--primary); font-weight:bold;' : 'color:#555;';
                 const badge = isMin ? ' <span style="background:var(--primary); color:white; padding:2px 5px; border-radius:4px; font-size:0.6rem; margin-left:5px;">Moins cher</span>' : '';
-                return `<li style="margin-bottom:3px; ${style}">${shop} : ${p.toFixed(2)}€${badge}</li>`;
+                if (ap) {
+                    const normal = pricesObj[shop] > 0 ? ` <s style="color:#999; font-weight:normal;">${pricesObj[shop].toFixed(2)}€</s>` : '';
+                    return `<li style="margin-bottom:3px; ${style}">${esc(shop)} : <span style="color:var(--promo-color);">${p.toFixed(2)}€</span>${normal} <span style="background:var(--promo-color); color:white; padding:2px 5px; border-radius:4px; font-size:0.6rem;">🏷️ Promo jusqu'au ${fmtDate(ap.to)}</span>${badge}</li>`;
+                }
+                return `<li style="margin-bottom:3px; ${style}">${esc(shop)} : ${p.toFixed(2)}€${badge}</li>`;
             }).join('');
+
+            // Panneau de gestion des promotions (ouvert à la demande)
+            let promoPanel = '';
+            if (openPromoId === c.id) {
+                const rows = [];
+                Object.keys(promosObj).forEach(shop => {
+                    (promosObj[shop] || []).forEach((p, i) => rows.push({ shop: shop, idx: i, p: p }));
+                });
+                rows.sort((a, b) => a.p.from.localeCompare(b.p.from));
+                const statusLabel = { active: ['En cours', 'var(--primary)'], future: ['À venir', 'var(--blue)'], past: ['Terminée', '#999'] };
+                const rowsHtml = rows.map(r => {
+                    const st = statusLabel[promoStatus(r.p)];
+                    return `<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; padding:4px 0; border-bottom:1px dashed #ddd; font-size:0.78rem;">
+                        <span>${esc(r.shop)} : <b>${r.p.price.toFixed(2)}€</b> · du ${fmtDate(r.p.from)} au ${fmtDate(r.p.to)} <span style="color:${st[1]}; font-weight:bold;">(${st[0]})</span></span>
+                        <button onclick="delPromoFromCat('${c.id}', '${encShop(r.shop)}', ${r.idx})" style="border:none; background:none; color:var(--danger); cursor:pointer;">✕</button>
+                    </div>`;
+                }).join('');
+                const shopOptions = '<option value="">Magasin...</option>' + sharedShops.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+                promoPanel = `<div style="margin-top:8px; padding:8px; background:#f6f0fa; border:1px solid var(--promo-color); border-radius:6px;">
+                    <div style="font-size:0.75rem; font-weight:bold; color:var(--promo-color); margin-bottom:5px;">🏷️ Promotions de ce produit</div>
+                    ${rowsHtml || '<div style="font-size:0.75rem; color:#999; padding:4px 0;">Aucune promotion enregistrée.</div>'}
+                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+                        <select id="promoShop-${c.id}" style="flex:2; min-width:110px; padding:6px; border:1px solid #ccc; border-radius:4px;">${shopOptions}</select>
+                        <input type="number" id="promoPrice-${c.id}" placeholder="Prix promo" step="0.01" style="flex:1; min-width:80px; max-width:90px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center; margin-top:5px; font-size:0.72rem;">
+                        <label>Du</label><input type="date" id="promoFrom-${c.id}" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
+                        <label>au</label><input type="date" id="promoTo-${c.id}" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
+                        <button class="btn btn-ok" onclick="addPromoToCat('${c.id}')" style="height:32px; padding:4px 12px;">Ajouter</button>
+                    </div>
+                </div>`;
+            }
 
             b.innerHTML += `<div style="padding:12px 10px; border-bottom:1px solid #eee;">
                 <div style="font-weight:bold; color:var(--dark); display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:1.05rem;">${c.name}</span>
-                    <button onclick="delCatItem('${c.id}')" style="color:var(--danger); border:none; background:none; cursor:pointer; font-size:0.8rem; padding:5px;">🗑️ Supprimer</button>
+                    <span style="display:flex; gap:2px;">
+                        <button onclick="togglePromoPanel('${c.id}')" style="color:var(--promo-color); border:none; background:none; cursor:pointer; font-size:0.8rem; padding:5px;">🏷️ Promos</button>
+                        <button onclick="delCatItem('${c.id}')" style="color:var(--danger); border:none; background:none; cursor:pointer; font-size:0.8rem; padding:5px;">🗑️ Supprimer</button>
+                    </span>
                 </div>
                 <ul style="margin:8px 0 0 15px; padding:0; font-size:0.85rem; list-style-type:square;">
                     ${pricesHtml || '<li style="color:#999;">Aucun prix enregistré</li>'}
                 </ul>
+                ${promoPanel}
             </div>`;
         });
     }
